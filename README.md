@@ -6,7 +6,9 @@ Este projeto é a implementação de um solver de otimização para a geração 
 
 O projeto foi desenvolvido como trabalho final para a disciplina de Otimização, aplicando conceitos de Pesquisa Operacional e Programação por Restrições a um problema real e complexo.
 
-https://www.siga.ufrj.br/sira/temas/zire/frameConsultas.jsp?mainPage=/repositorio-curriculo/61AD45DD-92A4-F79B-3D87-7A444052DF9B.html - Visitado 25 de Setembro de 2025 15:52
+https://www.siga.ufrj.br/sira/temas/zire/frameConsultas.jsp?mainPage=/repositorio-curriculo/61AD45DD-92A4-F79B-3D87-7A444052DF9B.html - Visitado 25 de Setembro de 2025 às 15:52
+
+Os horários das disciplinas utilizados tiveram como base o histórico delas visto em 25 de Setembro de 2025 às 18:30
 
 ## ✨ Funcionalidades
 
@@ -120,7 +122,7 @@ O problema foi modelado como um Problema de Satisfação de Restrições (CSP) c
 
 ## 👤 Autor
 
-**[Seu Nome Completo]**
+**Hugo Antunes**
 
   * **Email:** `hugoleandroantunes@gmail.com`
   * **GitHub:** `[hugo-antunes19](https://github.com/hugo-antunes19)`
