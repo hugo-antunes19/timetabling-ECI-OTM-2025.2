@@ -129,3 +129,63 @@ O problema foi modelado como um Problema de Satisfação de Restrições (CSP) c
 ## 📄 Licença
 
 Este projeto está sob a licença MIT.
+
+## O que encontramos até o momento
+
+--- Semestre 1 (Créditos: 28.0) ---
+  - Algoritmos e Programação (Turma: COS110T1) --- Horários: [SEG-13-15, QUA-13-15, SEX-13-15]
+  - Banco de Dados (Turma: EEL871T1) --- Horários: [SEG-08-10, SEX-07-10]
+  - Computacao Grafica (Turma: EEL882T1) --- Horários: [TER-15-17, QUI-15-17]
+  - Física Experimental I (Turma: FIS111T1) --- Horários: [TER-08-10]
+  - Física I - a (Turma: FIT112T4) --- Horários: [QUA-15-17, SEX-15-17]
+  - Gestão de Conhecimento I (Turma: COP232T1) --- Horários: [QUA-08-12]
+  - Introd Eng Comput e Informação (Turma: COS111T1) --- Horários: [QUI-13-15]
+  - Sistemas Distribuídos (Turma: COS470T1) --- Horários: [TER-10-12, QUI-10-12]
+
+--- Semestre 2 (Créditos: 27.0) ---
+  - Computadores e Sociedade (Turma: COS471T1) --- Horários: [TER-13-15, QUI-13-15]
+  - Cálculo Difer e Integral I (Turma: MAC118T4) --- Horários: [SEG-15-17, QUA-15-17, SEX-15-17]
+  - Empreendedorismo I (Turma: COP364T1) --- Horários: [SEX-08-12]
+  - Física Experimental II (Turma: FIS121T2) --- Horários: [SEX-08-10]
+  - Química Ee (Turma: IQG111T1) --- Horários: [TER-08-10, QUI-08-10]
+  - Redes de Computadores II (Turma: EEL879T1) --- Horários: [SEG-10-12, QUA-10-12]
+  - Álgebra Linear (Turma: MAE125T4) --- Horários: [TER-15-17, QUI-15-17]
+
+--- Semestre 3 (Créditos: 22.0) ---
+  - Circuitos Logicos (Turma: EEL280T1) --- Horários: [TER-10-12, TER-13-15, QUI-10-12]
+  - Computação de Alto Desempenho (Turma: COC472T1) --- Horários: [SEX-08-12]
+  - Cálculo Diferen e Integral II (Turma: MAC128T4) --- Horários: [SEG-15-17, QUA-15-17]
+  - Estruturas de Dados (Turma: COS231T1) --- Horários: [QUA-13-15, SEX-13-15]
+  - Física Experimental III (Turma: FIN231T1) --- Horários: [SEX-15-17]
+  - Redes de Computadores I (Turma: EEL878T1) --- Horários: [SEG-10-12, QUA-10-13]
+
+--- Semestre 4 (Créditos: 30.0) ---
+  - Cálculo Diferen e Integral III (Turma: MAC238T1) --- Horários: [TER-10-12, QUI-10-12]
+  - Cálculo Diferen e Integral IV (Turma: MAC248T3) --- Horários: [QUA-15-17, SEX-15-17]
+  - Engenharia de Software (Turma: EEL873T1) --- Horários: [TER-08-10, QUI-08-10]
+  - Física Experimental IV (Turma: FIN241T1) --- Horários: [SEG-15-17]
+  - Inteligência Computacional (Turma: COC361T1) --- Horários: [TER-15-17, QUI-15-17]
+  - Linguagens de Programacao (Turma: EEL670T1) --- Horários: [SEG-08-10, SEX-08-10, SEX-10-12]
+  - Telecomunicações (Turma: COE363T1) --- Horários: [TER-13-15, QUI-13-15]
+  - Teorias dos Grafos (Turma: COS242T1) --- Horários: [SEG-13-15, QUA-13-15]
+
+--- Semestre 5 (Créditos: 21.0) ---
+  - Algebra Linear Computacional (Turma: COC473T1) --- Horários: [TER-08-10, QUI-08-10]
+  - Arquitetura de Computadores (Turma: EEL580T1) --- Horários: [TER-13-15, QUI-12-15]
+  - Física II - a (Turma: FIT122T2) --- Horários: [QUA-15-17, SEX-15-17]
+  - Física III - a (Turma: FIM230T2) --- Horários: [QUA-10-12, SEX-10-12]
+  - Lógica Matemática (Turma: COS351T1) --- Horários: [TER-10-12, QUI-10-12]
+
+--- Semestre 6 (Créditos: 21.0) ---
+  - Construção de Bancos de Dados (Turma: COS480T1) --- Horários: [SEG-10-12, QUA-10-12]
+  - Estatística e Mod. Probabilist (Turma: COE241T1) --- Horários: [TER-15-17, QUI-15-17]
+  - Otimização (Turma: COS360T1) --- Horários: [SEG-08-10, QUA-08-10]
+  - Qualidade de Software (Turma: COS482T1) --- Horários: [TER-10-12, QUI-10-12]
+  - Sistemas Digitais (Turma: EEL480T1) --- Horários: [TER-08-10, TER-13-15, QUI-08-10]
+
+--- Semestre 7 (Créditos: 19.0) ---
+  - Física IV - a (Turma: FIM240T1) --- Horários: [QUA-08-10, SEX-08-10]
+  - Programação Avançada (Turma: EEL418T1) --- Horários: [SEG-15-17, SEX-15-17]
+  - Quimica Experimental EE (Turma: IQG112T1) --- Horários: [QUA-13-17]
+  - Sistemas Operacionais (Turma: EEL770T1) --- Horários: [TER-15-17, QUI-15-17]
+  - Teoria da Computacao (Turma: EEL881T1) --- Horários: [TER-08-12, QUI-08-10, QUI-10-12]
