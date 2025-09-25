@@ -6,6 +6,8 @@ Este projeto é a implementação de um solver de otimização para a geração 
 
 O projeto foi desenvolvido como trabalho final para a disciplina de Otimização, aplicando conceitos de Pesquisa Operacional e Programação por Restrições a um problema real e complexo.
 
+https://www.siga.ufrj.br/sira/temas/zire/frameConsultas.jsp?mainPage=/repositorio-curriculo/61AD45DD-92A4-F79B-3D87-7A444052DF9B.html - Visitado 25 de Setembro de 2025 15:52
+
 ## ✨ Funcionalidades
 
   * **Extração Automática de Dados:** Um script de web scraping (`scraper_ufrj.py`) analisa o HTML oficial da grade curricular da UFRJ e extrai todas as disciplinas, créditos e pré-requisitos.
