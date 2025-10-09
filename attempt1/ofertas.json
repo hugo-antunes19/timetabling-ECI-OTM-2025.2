@@ -165,13 +165,13 @@
     {
     "disciplina_id": "EEL580",
     "turma_id": "EEL580T1",
-    "horario": ["TER-13-15", "QUI-12-15"],
+    "horario": ["TER-13-15", "QUI-13-15"],
     "periodo": "1"
     },
     {
     "disciplina_id": "EEL881",
     "turma_id": "EEL881T1",
-    "horario": ["TER-08-12", "QUI-08-10", "QUI-10-12"],
+    "horario": ["TER-08-10", "QUI-08-10"],
     "periodo": "1"
     },
     {
@@ -303,19 +303,19 @@
     {
     "disciplina_id": "EEL871",
     "turma_id": "EEL871T1",
-    "horario": ["SEG-08-10", "SEX-07-10"],
+    "horario": ["SEG-08-10", "SEX-08-10"],
     "periodo": "1, 2"
     },
     {
     "disciplina_id": "EEL878",
     "turma_id": "EEL878T1",
-    "horario": ["SEG-10-12", "QUA-10-13"],
+    "horario": ["SEG-10-12", "QUA-10-12"],
     "periodo": "1"
     },
     {
     "disciplina_id": "IQG112",
     "turma_id": "IQG112T1",
-    "horario": ["QUA-13-17"],
+    "horario": ["QUA-13-15", "QUA-15-17"],
     "periodo": "1, 2"
     },
     {
@@ -351,13 +351,13 @@
     {
     "disciplina_id": "COC472",
     "turma_id": "COC472T1",
-    "horario": ["SEX-08-12"],
+    "horario": ["SEX-08-10", "SEX-10-12"],
     "periodo": "1"
     },
     {
     "disciplina_id": "COP232",
     "turma_id": "COP232T1",
-    "horario": ["QUA-08-12"],
+    "horario": ["QUA-08-10", "QUA-10-12"],
     "periodo": "1"
     },
     {
@@ -381,7 +381,7 @@
     {
     "disciplina_id": "COP364",
     "turma_id": "COP364T1",
-    "horario": ["SEX-08-12"],
+    "horario": ["SEX-08-10", "SEX-10-12"],
     "periodo": "2"
     },
     {
@@ -395,6 +395,67 @@
     "turma_id": "COS482T1",
     "horario": ["TER-10-12", "QUI-10-12"],
     "periodo": "2"
+    },
+    {
+    "disciplina_id": "EEL970",
+    "turma_id": "EEL970T1",
+    "horario": ["TER-10-12", "QUI-10-12"],
+    "periodo": "1"
+    },
+    {
+    "disciplina_id": "COS013",
+    "turma_id": "COS013T1",
+    "horario": ["TER-10-12", "QUI-10-12"],
+    "periodo": "2"
+    },
+    {
+    "disciplina_id": "EEL841",
+    "turma_id": "EEL841T1",
+    "horario": ["TER-13-15", "QUI-13-15"],
+    "periodo": "1, 2"
+    },
+    {
+    "disciplina_id": "EEL880",
+    "turma_id": "EEL880T1",
+    "horario": ["SEG-10-12", "QUA-10-12"],
+    "periodo": "2"
+    },
+    {
+    "disciplina_id": "EEL890",
+    "turma_id": "EEL890T1",
+    "horario": ["TER-10-12", "QUI-10-12"],
+    "periodo": "1"
+    },
+    {
+    "disciplina_id": "COP509",
+    "turma_id": "COP509T1",
+    "horario": ["SEG-13-15", "SEG-15-17"],
+    "periodo": "1"
+    },
+    {
+    "disciplina_id": "COS010",
+    "turma_id": "COS010T1",
+    "horario": ["SEG-15-17", "QUA-15-17"],
+    "periodo": "2"
+    },
+    {
+    "disciplina_id": "EEL816",
+    "turma_id": "EEL816T1",
+    "horario": ["TER-15-17", "QUI-15-17"],
+    "periodo": "2"
+    },
+    {
+    "disciplina_id": "EEL874",
+    "turma_id": "EEL874T1",
+    "horario": ["SEG-10-12", "SEX-10-12"],
+    "periodo": "1, 2"
+    },
+    {
+    "disciplina_id": "EEL880",
+    "turma_id": "EEL880T1",
+    "horario": ["SEG-10-12", "QUA-10-12"],
+    "periodo": "2"
     }
+    
     
   ]

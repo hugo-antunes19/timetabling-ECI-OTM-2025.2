@@ -1,0 +1,82 @@
+
+    <html>
+    <head>
+        <title>Grade Horária Otimizada</title>
+        <style>
+            body { 
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                margin: 0;
+                padding: 2em;
+                background-color: #f8f9fa;
+                color: #212529;
+            }
+            .container { 
+                max-width: 1200px; 
+                margin: auto;
+            }
+            h1 { 
+                color: #003366; 
+                text-align: center;
+                border-bottom: 3px solid #003366;
+                padding-bottom: 10px;
+            }
+            h2 { 
+                color: #343a40; 
+                border-bottom: 2px solid #dee2e6;
+                padding-bottom: 8px;
+                margin-top: 50px;
+            }
+            table.grade-semanal { 
+                border-collapse: collapse; 
+                width: 100%; 
+                margin-top: 20px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                table-layout: fixed;
+            }
+            .grade-semanal th, .grade-semanal td { 
+                border: 1px solid #dee2e6; 
+                padding: 10px; 
+                text-align: center; 
+                height: 80px;
+                vertical-align: top;
+            }
+            .grade-semanal thead { 
+                background-color: #003366; 
+                color: white;
+            }
+            .grade-semanal tbody tr:nth-child(even) { 
+                background-color: #fdfdfd; 
+            }
+            .grade-semanal td.horario-label {
+                font-weight: bold;
+                background-color: #f8f9fa;
+                width: 12%;
+            }
+            .materia-cell {
+                background-color: #e7f5ff;
+                font-size: 0.9em;
+                line-height: 1.4;
+            }
+            .materia-cell small {
+                color: #555;
+            }
+            .notas {
+                margin-top: 15px;
+                padding: 10px;
+                background-color: #fffbe6;
+                border-left: 4px solid #ffc107;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Grade Horária Otimizada</h1>
+    <h2>Semestre 1 (Créditos: 24.0)</h2>
+<table class='grade-semanal'><thead><tr><th>Horário</th><th>Segunda-feira</th><th>Terça-feira</th><th>Quarta-feira</th><th>Quinta-feira</th><th>Sexta-feira</th></tr></thead><tbody><tr><td class='horario-label'>08:00 - 10:00</td><td class='materia-cell'><b>Cálculo Difer e Integral I</b><br><small>(MAC118T1)</small></td><td class='materia-cell'><b>Física Experimental I</b><br><small>(FIS111T1)</small></td><td class='materia-cell'><b>Cálculo Difer e Integral I</b><br><small>(MAC118T1)</small></td><td class=''></td><td class='materia-cell'><b>Cálculo Difer e Integral I</b><br><small>(MAC118T1)</small></td></tr><tr><td class='horario-label'>10:00 - 12:00</td><td class=''></td><td class='materia-cell'><b>Software para Smartphone</b><br><small>(EEL970T1)</small></td><td class='materia-cell'><b>Física I - a</b><br><small>(FIT112T2)</small></td><td class='materia-cell'><b>Software para Smartphone</b><br><small>(EEL970T1)</small></td><td class='materia-cell'><b>Física I - a</b><br><small>(FIT112T2)</small></td></tr><tr><td class='horario-label'>13:00 - 15:00</td><td class=''></td><td class='materia-cell'><b>Novas Mídias</b><br><small>(EEL841T1)</small></td><td class=''></td><td class='materia-cell'><b>Novas Mídias</b><br><small>(EEL841T1)</small></td><td class=''></td></tr><tr><td class='horario-label'>15:00 - 17:00</td><td class=''></td><td class='materia-cell'><b>Sistemas Operacionais</b><br><small>(EEL770T1)</small></td><td class=''></td><td class='materia-cell'><b>Sistemas Operacionais</b><br><small>(EEL770T1)</small></td><td class=''></td></tr></tbody></table><h2>Semestre 2 (Créditos: 19.0)</h2>
+<table class='grade-semanal'><thead><tr><th>Horário</th><th>Segunda-feira</th><th>Terça-feira</th><th>Quarta-feira</th><th>Quinta-feira</th><th>Sexta-feira</th></tr></thead><tbody><tr><td class='horario-label'>08:00 - 10:00</td><td class='materia-cell'><b>Linguagens de Programacao</b><br><small>(EEL670T1)</small></td><td class=''></td><td class=''></td><td class=''></td><td class='materia-cell'><b>Linguagens de Programacao</b><br><small>(EEL670T1)</small></td></tr><tr><td class='horario-label'>10:00 - 12:00</td><td class='materia-cell'><b>Redes de Computadores II</b><br><small>(EEL879T1)</small></td><td class='materia-cell'><b>Circuitos Logicos</b><br><small>(EEL280T1)</small></td><td class='materia-cell'><b>Redes de Computadores II</b><br><small>(EEL879T1)</small></td><td class='materia-cell'><b>Circuitos Logicos</b><br><small>(EEL280T1)</small></td><td class='materia-cell'><b>Linguagens de Programacao</b><br><small>(EEL670T1)</small></td></tr><tr><td class='horario-label'>13:00 - 15:00</td><td class='materia-cell'><b>Cálculo Diferen e Integral II</b><br><small>(MAC128T3)</small></td><td class='materia-cell'><b>Circuitos Logicos</b><br><small>(EEL280T1)</small></td><td class='materia-cell'><b>Cálculo Diferen e Integral II</b><br><small>(MAC128T3)</small></td><td class=''></td><td class=''></td></tr><tr><td class='horario-label'>15:00 - 17:00</td><td class=''></td><td class=''></td><td class=''></td><td class='materia-cell'><b>Física Experimental II</b><br><small>(FIS121T1)</small></td><td class=''></td></tr></tbody></table><h2>Semestre 3 (Créditos: 27.0)</h2>
+<table class='grade-semanal'><thead><tr><th>Horário</th><th>Segunda-feira</th><th>Terça-feira</th><th>Quarta-feira</th><th>Quinta-feira</th><th>Sexta-feira</th></tr></thead><tbody><tr><td class='horario-label'>08:00 - 10:00</td><td class='materia-cell'><b>Banco de Dados</b><br><small>(EEL871T1)</small></td><td class='materia-cell'><b>Álgebra Linear</b><br><small>(MAE125T1)</small></td><td class=''></td><td class='materia-cell'><b>Álgebra Linear</b><br><small>(MAE125T1)</small></td><td class='materia-cell'><b>Banco de Dados</b><br><small>(EEL871T1)</small></td></tr><tr><td class='horario-label'>10:00 - 12:00</td><td class=''></td><td class='materia-cell'><b>Lógica Matemática</b><br><small>(COS351T1)</small></td><td class=''></td><td class='materia-cell'><b>Lógica Matemática</b><br><small>(COS351T1)</small></td><td class=''></td></tr><tr><td class='horario-label'>13:00 - 15:00</td><td class='materia-cell'><b>Algoritmos e Programação</b><br><small>(COS110T1)</small></td><td class=''></td><td class='materia-cell'><b>Algoritmos e Programação</b><br><small>(COS110T1)</small></td><td class='materia-cell'><b>Introd Eng Comput e Informação</b><br><small>(COS111T1)</small></td><td class='materia-cell'><b>Algoritmos e Programação</b><br><small>(COS110T1)</small></td></tr><tr><td class='horario-label'>15:00 - 17:00</td><td class=''></td><td class='materia-cell'><b>Cálculo Diferen e Integral III</b><br><small>(MAC238T3)</small></td><td class='materia-cell'><b>Física III - a</b><br><small>(FIM230T3)</small></td><td class='materia-cell'><b>Cálculo Diferen e Integral III</b><br><small>(MAC238T3)</small></td><td class='materia-cell'><b>Física III - a</b><br><small>(FIM230T3)</small></td></tr></tbody></table><h2>Semestre 4 (Créditos: 19.0)</h2>
+<table class='grade-semanal'><thead><tr><th>Horário</th><th>Segunda-feira</th><th>Terça-feira</th><th>Quarta-feira</th><th>Quinta-feira</th><th>Sexta-feira</th></tr></thead><tbody><tr><td class='horario-label'>08:00 - 10:00</td><td class='materia-cell'><b>Otimização</b><br><small>(COS360T1)</small></td><td class='materia-cell'><b>Engenharia de Software</b><br><small>(EEL873T1)</small></td><td class='materia-cell'><b>Otimização</b><br><small>(COS360T1)</small></td><td class='materia-cell'><b>Engenharia de Software</b><br><small>(EEL873T1)</small></td><td class=''></td></tr><tr><td class='horario-label'>10:00 - 12:00</td><td class=''></td><td class=''></td><td class=''></td><td class=''></td><td class=''></td></tr><tr><td class='horario-label'>13:00 - 15:00</td><td class=''></td><td class='materia-cell'><b>Computadores e Sociedade</b><br><small>(COS471T1)</small></td><td class='materia-cell'><b>Quimica Experimental EE</b><br><small>(IQG112T1)</small></td><td class='materia-cell'><b>Computadores e Sociedade</b><br><small>(COS471T1)</small></td><td class=''></td></tr><tr><td class='horario-label'>15:00 - 17:00</td><td class=''></td><td class='materia-cell'><b>Inteligência Computacional</b><br><small>(COC361T1)</small></td><td class='materia-cell'><b>Quimica Experimental EE</b><br><small>(IQG112T1)</small></td><td class='materia-cell'><b>Inteligência Computacional</b><br><small>(COC361T1)</small></td><td class='materia-cell'><b>Física Experimental III</b><br><small>(FIN231T1)</small></td></tr></tbody></table><h2>Semestre 5 (Créditos: 26.0)</h2>
+<table class='grade-semanal'><thead><tr><th>Horário</th><th>Segunda-feira</th><th>Terça-feira</th><th>Quarta-feira</th><th>Quinta-feira</th><th>Sexta-feira</th></tr></thead><tbody><tr><td class='horario-label'>08:00 - 10:00</td><td class=''></td><td class='materia-cell'><b>Teoria da Computacao</b><br><small>(EEL881T1)</small></td><td class='materia-cell'><b>Gestão de Conhecimento I</b><br><small>(COP232T1)</small></td><td class='materia-cell'><b>Teoria da Computacao</b><br><small>(EEL881T1)</small></td><td class=''></td></tr><tr><td class='horario-label'>10:00 - 12:00</td><td class='materia-cell'><b>Inteligencia Artifical</b><br><small>(EEL874T1)</small></td><td class='materia-cell'><b>Sistemas Distribuídos</b><br><small>(COS470T1)</small></td><td class='materia-cell'><b>Gestão de Conhecimento I</b><br><small>(COP232T1)</small></td><td class='materia-cell'><b>Sistemas Distribuídos</b><br><small>(COS470T1)</small></td><td class='materia-cell'><b>Inteligencia Artifical</b><br><small>(EEL874T1)</small></td></tr><tr><td class='horario-label'>13:00 - 15:00</td><td class='materia-cell'><b>Trabalho do Futuro</b><br><small>(COP509T1)</small></td><td class=''></td><td class='materia-cell'><b>Estruturas de Dados</b><br><small>(COS231T1)</small></td><td class=''></td><td class='materia-cell'><b>Estruturas de Dados</b><br><small>(COS231T1)</small></td></tr><tr><td class='horario-label'>15:00 - 17:00</td><td class='materia-cell'><b>Trabalho do Futuro</b><br><small>(COP509T1)</small></td><td class=''></td><td class=''></td><td class=''></td><td class=''></td></tr></tbody></table><h2>Semestre 6 (Créditos: 29.0)</h2>
+<table class='grade-semanal'><thead><tr><th>Horário</th><th>Segunda-feira</th><th>Terça-feira</th><th>Quarta-feira</th><th>Quinta-feira</th><th>Sexta-feira</th></tr></thead><tbody><tr><td class='horario-label'>08:00 - 10:00</td><td class=''></td><td class='materia-cell'><b>Química Ee</b><br><small>(IQG111T1)</small></td><td class=''></td><td class='materia-cell'><b>Química Ee</b><br><small>(IQG111T1)</small></td><td class=''></td></tr><tr><td class='horario-label'>10:00 - 12:00</td><td class='materia-cell'><b>Construção de Bancos de Dados</b><br><small>(COS480T1)</small></td><td class='materia-cell'><b>Qualidade de Software</b><br><small>(COS482T1)</small></td><td class='materia-cell'><b>Construção de Bancos de Dados</b><br><small>(COS480T1)</small></td><td class='materia-cell'><b>Qualidade de Software</b><br><small>(COS482T1)</small></td><td class=''></td></tr><tr><td class='horario-label'>13:00 - 15:00</td><td class='materia-cell'><b>Teorias dos Grafos</b><br><small>(COS242T1)</small></td><td class='materia-cell'><b>Telecomunicações</b><br><small>(COE363T1)</small></td><td class='materia-cell'><b>Teorias dos Grafos</b><br><small>(COS242T1)</small></td><td class='materia-cell'><b>Telecomunicações</b><br><small>(COE363T1)</small></td><td class=''></td></tr><tr><td class='horario-label'>15:00 - 17:00</td><td class='materia-cell'><b>Física Experimental IV</b><br><small>(FIN241T1)</small></td><td class='materia-cell'><b>Estatística e Mod. Probabilist</b><br><small>(COE241T1)</small></td><td class='materia-cell'><b>Física II - a</b><br><small>(FIT122T2)</small></td><td class='materia-cell'><b>Estatística e Mod. Probabilist</b><br><small>(COE241T1)</small></td><td class='materia-cell'><b>Física II - a</b><br><small>(FIT122T2)</small></td></tr></tbody></table><h2>Semestre 7 (Créditos: 32.0)</h2>
+<table class='grade-semanal'><thead><tr><th>Horário</th><th>Segunda-feira</th><th>Terça-feira</th><th>Quarta-feira</th><th>Quinta-feira</th><th>Sexta-feira</th></tr></thead><tbody><tr><td class='horario-label'>08:00 - 10:00</td><td class=''></td><td class='materia-cell'><b>Algebra Linear Computacional</b><br><small>(COC473T1)</small></td><td class=''></td><td class='materia-cell'><b>Algebra Linear Computacional</b><br><small>(COC473T1)</small></td><td class='materia-cell'><b>Computação de Alto Desempenho</b><br><small>(COC472T1)</small></td></tr><tr><td class='horario-label'>10:00 - 12:00</td><td class='materia-cell'><b>Redes de Computadores I</b><br><small>(EEL878T1)</small></td><td class='materia-cell'><b>Big-data</b><br><small>(EEL890T1)</small></td><td class='materia-cell'><b>Redes de Computadores I</b><br><small>(EEL878T1)</small></td><td class='materia-cell'><b>Big-data</b><br><small>(EEL890T1)</small></td><td class='materia-cell'><b>Computação de Alto Desempenho</b><br><small>(COC472T1)</small></td></tr><tr><td class='horario-label'>13:00 - 15:00</td><td class=''></td><td class='materia-cell'><b>Arquitetura de Computadores</b><br><small>(EEL580T1)</small></td><td class='materia-cell'><b>Física IV - a</b><br><small>(FIM240T3)</small></td><td class='materia-cell'><b>Arquitetura de Computadores</b><br><small>(EEL580T1)</small></td><td class='materia-cell'><b>Física IV - a</b><br><small>(FIM240T3)</small></td></tr><tr><td class='horario-label'>15:00 - 17:00</td><td class='materia-cell'><b>Programação Avançada</b><br><small>(EEL418T1)</small></td><td class='materia-cell'><b>Computacao Grafica</b><br><small>(EEL882T1)</small></td><td class=''></td><td class='materia-cell'><b>Computacao Grafica</b><br><small>(EEL882T1)</small></td><td class='materia-cell'><b>Programação Avançada</b><br><small>(EEL418T1)</small></td></tr></tbody></table><h2>Semestre 8 (Créditos: 29.0)</h2>
+<table class='grade-semanal'><thead><tr><th>Horário</th><th>Segunda-feira</th><th>Terça-feira</th><th>Quarta-feira</th><th>Quinta-feira</th><th>Sexta-feira</th></tr></thead><tbody><tr><td class='horario-label'>08:00 - 10:00</td><td class=''></td><td class='materia-cell'><b>Sistemas Digitais</b><br><small>(EEL480T1)</small></td><td class=''></td><td class='materia-cell'><b>Sistemas Digitais</b><br><small>(EEL480T1)</small></td><td class='materia-cell'><b>Empreendedorismo I</b><br><small>(COP364T1)</small></td></tr><tr><td class='horario-label'>10:00 - 12:00</td><td class='materia-cell'><b>Top Esp em Sistemas Digitais</b><br><small>(EEL880T1)</small></td><td class='materia-cell'><b>Tóp Esp Eng de Comp e Informaç</b><br><small>(COS013T1)</small></td><td class='materia-cell'><b>Top Esp em Sistemas Digitais</b><br><small>(EEL880T1)</small></td><td class='materia-cell'><b>Tóp Esp Eng de Comp e Informaç</b><br><small>(COS013T1)</small></td><td class='materia-cell'><b>Empreendedorismo I</b><br><small>(COP364T1)</small></td></tr><tr><td class='horario-label'>13:00 - 15:00</td><td class=''></td><td class='materia-cell'><b>Sistemas Digitais</b><br><small>(EEL480T1)</small></td><td class='materia-cell'><b>Cálculo Diferen e Integral IV</b><br><small>(MAC248T2)</small></td><td class=''></td><td class='materia-cell'><b>Cálculo Diferen e Integral IV</b><br><small>(MAC248T2)</small></td></tr><tr><td class='horario-label'>15:00 - 17:00</td><td class='materia-cell'><b>Redes Complexas</b><br><small>(COS010T1)</small></td><td class='materia-cell'><b>Processamento de Voz</b><br><small>(EEL816T1)</small></td><td class='materia-cell'><b>Redes Complexas</b><br><small>(COS010T1)</small></td><td class='materia-cell'><b>Processamento de Voz</b><br><small>(EEL816T1)</small></td><td class=''></td></tr></tbody></table></div></body></html>
