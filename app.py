@@ -1,8 +1,9 @@
 # app.py
 import json
-import re # Importa o módulo de expressões regulares
+import re
 from flask import Flask, render_template, request
 from ortools.sat.python import cp_model
+from collections import OrderedDict
 
 # Importa as funções dos seus outros arquivos .py
 from data_loader import carregar_dados
@@ -16,7 +17,8 @@ CAMINHO_DISCIPLINAS = './data/disciplinas.json'
 CAMINHO_OFERTAS = './data/ofertas.json'
 NUM_SEMESTRES = 10
 CREDITOS_MAXIMOS_POR_SEMESTRE = 32
-CREDITOS_MINIMOS = {
+# Meta TOTAL de créditos de optativas para o curso
+CREDITOS_MINIMOS_TOTAIS = {
     "restrita": 4,
     "condicionada": 40,
     "livre": 8
@@ -24,12 +26,26 @@ CREDITOS_MINIMOS = {
 
 @app.route('/')
 def index():
-    """ Rota principal que exibe a página inicial com o formulário. """
+    """
+    Rota principal que carrega e exibe a página inicial com o formulário,
+    agrupando as disciplinas por período e tipo.
+    """
     try:
         with open(CAMINHO_DISCIPLINAS, 'r', encoding='utf-8') as f:
             todas_disciplinas = json.load(f)
-        todas_disciplinas.sort(key=lambda x: (x.get('tipo', 'Z'), x.get('nome', '')))
-        return render_template('index.html', disciplinas=todas_disciplinas)
+        
+        disciplinas_agrupadas = OrderedDict()
+        for disciplina in todas_disciplinas:
+            tipo = disciplina.get('tipo', 'Outras')
+            if tipo not in disciplinas_agrupadas:
+                disciplinas_agrupadas[tipo] = []
+            disciplinas_agrupadas[tipo].append(disciplina)
+            
+        for tipo in disciplinas_agrupadas:
+            disciplinas_agrupadas[tipo].sort(key=lambda x: x.get('nome', ''))
+
+        return render_template('index.html', disciplinas_agrupadas=disciplinas_agrupadas)
+    
     except FileNotFoundError:
         return "Erro: O arquivo 'disciplinas.json' não foi encontrado.", 500
 
@@ -37,19 +53,51 @@ def index():
 @app.route('/gerar', methods=['POST'])
 def gerar_grade():
     """
-    Rota que recebe os dados do formulário (POST), executa o otimizador
-    e renderiza a página de resultados com a grade otimizada.
+    Recebe os dados, CALCULA os créditos de optativas restantes, executa o
+    otimizador e renderiza a página de resultados.
     """
-    disciplinas_concluidas = request.form.getlist('concluidas')
-    print(f"Disciplinas recebidas como concluídas: {disciplinas_concluidas}")
+    disciplinas_concluidas_ids = request.form.getlist('concluidas')
+    print(f"Disciplinas recebidas como concluídas: {disciplinas_concluidas_ids}")
 
     try:
-        dados = carregar_dados(CAMINHO_DISCIPLINAS, CAMINHO_OFERTAS, disciplinas_concluidas)
+        with open(CAMINHO_DISCIPLINAS, 'r', encoding='utf-8') as f:
+            todas_disciplinas_info = {d['id']: d for d in json.load(f)}
+    except FileNotFoundError:
+        return "Erro: 'disciplinas.json' não encontrado para calcular créditos.", 500
+
+    creditos_concluidos = {"restrita": 0, "condicionada": 0, "livre": 0}
+    
+    for disciplina_id in disciplinas_concluidas_ids:
+        if disciplina_id in todas_disciplinas_info:
+            disciplina = todas_disciplinas_info[disciplina_id]
+            tipo = disciplina.get('tipo', '')
+            creditos = disciplina.get('creditos', 0)
+
+            if "Restrita" in tipo:
+                creditos_concluidos["restrita"] += creditos
+            elif "Condicionada" in tipo:
+                creditos_concluidos["condicionada"] += creditos
+            elif "Livre" in tipo or disciplina_id.startswith("ARTIFICIAL"):
+                creditos_concluidos["livre"] += creditos
+
+    # Calcula os créditos que AINDA FALTAM
+    # >>>>> A CORREÇÃO ESTÁ AQUI: Convertendo o resultado para int() <<<<<
+    creditos_restantes = {
+        categoria: int(max(0, CREDITOS_MINIMOS_TOTAIS[categoria] - creditos_concluidos[categoria]))
+        for categoria in CREDITOS_MINIMOS_TOTAIS
+    }
+    
+    print(f"Créditos concluídos: {creditos_concluidos}")
+    print(f"Créditos restantes a serem cumpridos: {creditos_restantes}")
+
+    try:
+        dados = carregar_dados(CAMINHO_DISCIPLINAS, CAMINHO_OFERTAS, disciplinas_concluidas_ids)
     except FileNotFoundError as e:
         return f"Erro ao carregar arquivos de dados: {e}", 500
 
+    # Passa a meta de créditos JÁ AJUSTADA e do TIPO CORRETO para o otimizador
     grade_result, creditos, status, obj_value = resolver_grade(
-        dados, CREDITOS_MINIMOS, NUM_SEMESTRES, CREDITOS_MAXIMOS_POR_SEMESTRE
+        dados, creditos_restantes, NUM_SEMESTRES, CREDITOS_MAXIMOS_POR_SEMESTRE
     )
 
     status_str = 'UNKNOWN'
@@ -58,15 +106,10 @@ def gerar_grade():
         elif status == cp_model.FEASIBLE: status_str = 'FEASIBLE'
         elif status == cp_model.INFEASIBLE: status_str = 'INFEASIBLE'
 
-    # --- NOVA LÓGICA DE PROCESSAMENTO (CORREÇÃO) ---
-    # Esta seção agora interpreta a string retornada pelo optimizer.py
     grades_processadas = {}
     if grade_result:
         dias = ['SEG', 'TER', 'QUA', 'QUI', 'SEX']
         horarios_label = ['08-10', '10-12', '13-15', '15-17']
-        
-        # Regex para extrair: 1=Nome, 2=Turma, 3=Horários
-        # Exemplo da string: "Nome da Disciplina (Turma: IDTURMA) --- Horários: [HORARIO1, HORARIO2]"
         parse_pattern = re.compile(r'^(.*?) \(Turma: (.*?)\) --- Horários: \[(.*?)\]$')
 
         for s, disciplinas_do_semestre_str in grade_result.items():
@@ -78,13 +121,9 @@ def gerar_grade():
             for disciplina_str in disciplinas_do_semestre_str:
                 match = parse_pattern.match(disciplina_str)
                 if match:
-                    # Extrai os dados da string usando o regex
                     nome, turma, horarios_str = match.groups()
                     horarios = [h.strip() for h in horarios_str.split(',')]
-                    
                     disciplina_info = {"nome": nome, "turma": turma}
-
-                    # Preenche a grade semanal com os dados extraídos
                     for horario_completo in horarios:
                         parts = horario_completo.split('-')
                         if len(parts) == 3:
@@ -97,7 +136,6 @@ def gerar_grade():
                 "creditos": creditos.get(s, 0),
                 "grade_semanal": grade_semanal
             }
-    # --- FIM DA NOVA LÓGICA ---
 
     return render_template(
         'resultado.html',
@@ -109,4 +147,3 @@ def gerar_grade():
 
 if __name__ == '__main__':
     app.run(debug=True)
-

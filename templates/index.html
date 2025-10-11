@@ -4,28 +4,152 @@
     <meta charset="UTF-8">
     <title>Otimizador de Grade Horária</title>
     <style>
-        /* Você pode adicionar o CSS do seu arquivo grade_horaria.html aqui ou em um arquivo .css separado */
-        body { font-family: sans-serif; padding: 2em; }
-        .disciplinas-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .disciplina-item { display: block; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            padding: 2em; 
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+        h1 {
+            color: #003366;
+            text-align: center;
+        }
+        #search-container {
+            margin: 2em 0;
+        }
+        #searchInput {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .periodo-grupo {
+            margin-bottom: 1em;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #fff;
+        }
+        .periodo-grupo summary {
+            font-weight: bold;
+            font-size: 1.2em;
+            padding: 15px;
+            cursor: pointer;
+            outline: none;
+            background-color: #f7f7f7;
+            border-radius: 8px 8px 0 0;
+        }
+        .disciplinas-grid {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .disciplina-item {
+            display: flex; /* Alinha o checkbox com o texto */
+            align-items: center;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .disciplina-item:hover {
+            background-color: #f0f8ff;
+        }
+        .disciplina-item input {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        .submit-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: white;
+            background-color: #004a99;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 2em;
+        }
+        .submit-button:hover {
+            background-color: #003366;
+        }
     </style>
 </head>
 <body>
-    <h1>Otimizador de Grade Horária</h1>
-    <p>Marque todas as disciplinas que você <strong>já concluiu</strong> e clique em "Gerar Grade".</p>
-    
-    <form action="/gerar" method="post">
-        <h2>Disciplinas Concluídas</h2>
-        <div class="disciplinas-grid">
-            {% for disciplina in disciplinas %}
-            <label class="disciplina-item">
-                <input type="checkbox" name="concluidas" value="{{ disciplina.id }}">
-                {{ disciplina.id }} - {{ disciplina.nome }}
-            </label>
+    <div class="container">
+        <h1>Otimizador de Grade Horária</h1>
+        <p>Marque todas as disciplinas que você <strong>já concluiu</strong> e clique em "Gerar Grade".</p>
+        
+        <form action="/gerar" method="post">
+            <div id="search-container">
+                <input type="text" id="searchInput" onkeyup="filtrarDisciplinas()" placeholder="Buscar disciplina pelo nome...">
+            </div>
+
+            {% for grupo, disciplinas in disciplinas_agrupadas.items() %}
+            <details class="periodo-grupo" open>
+                <summary>{{ grupo }}</summary>
+                <div class="disciplinas-grid">
+                    {% for disciplina in disciplinas %}
+                    <label class="disciplina-item">
+                        <input type="checkbox" name="concluidas" value="{{ disciplina.id }}">
+                        {{ disciplina.id }} - {{ disciplina.nome }}
+                    </label>
+                    {% endfor %}
+                </div>
+            </details>
             {% endfor %}
-        </div>
-        <br>
-        <button type="submit">Gerar Grade Ideal</button>
-    </form>
+            
+            <button type="submit" class="submit-button">Gerar Grade Ideal</button>
+        </form>
+    </div>
+
+    <script>
+        /**
+         * Normaliza um texto para busca, removendo acentos e convertendo para minúsculas.
+         * Ex: "Programação" -> "programacao"
+         */
+        function normalizarTexto(texto) {
+            return texto
+                .toLowerCase()
+                .normalize("NFD") // Separa os caracteres dos seus acentos (ex: 'á' -> 'a' + '´')
+                .replace(/[\u0300-\u036f]/g, ""); // Remove os acentos (diacríticos)
+        }
+
+        function filtrarDisciplinas() {
+            // Pega o termo da busca e já o normaliza para a comparação
+            const termoBusca = normalizarTexto(document.getElementById('searchInput').value);
+            
+            const grupos = document.querySelectorAll('.periodo-grupo');
+
+            grupos.forEach(grupo => {
+                const disciplinas = grupo.querySelectorAll('.disciplina-item');
+                
+                disciplinas.forEach(disciplina => {
+                    // Pega o texto da disciplina e também o normaliza
+                    const nomeDisciplina = normalizarTexto(disciplina.textContent);
+                    
+                    // Compara os textos já normalizados
+                    if (nomeDisciplina.includes(termoBusca)) {
+                        disciplina.style.display = 'flex'; // Mostra a disciplina
+                    } else {
+                        disciplina.style.display = 'none'; // Esconde a disciplina
+                    }
+                });
+
+                // Garante que todos os grupos fiquem abertos durante uma busca
+                if (termoBusca.length > 0) {
+                    grupo.open = true;
+                }
+            });
+        }
+    </script>
+
 </body>
 </html>
