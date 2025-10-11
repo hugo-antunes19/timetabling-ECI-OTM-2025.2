@@ -4,90 +4,60 @@
     <meta charset="UTF-8">
     <title>Otimizador de Grade Horária</title>
     <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            padding: 2em; 
-            background-color: #f8f9fa;
-            color: #212529;
-        }
-        .container {
-            max-width: 900px;
-            margin: auto;
-        }
-        h1 {
-            color: #003366;
-            text-align: center;
-        }
-        #search-container {
-            margin: 2em 0;
-        }
-        #searchInput {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-        .periodo-grupo {
-            margin-bottom: 1em;
-            border: 1px solid #e0e0e0;
+        /* ... (seu CSS existente - sem alterações) ... */
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; padding: 2em; background-color: #f8f9fa; color: #212529; }
+        .container { max-width: 900px; margin: auto; }
+        h1 { color: #003366; text-align: center; }
+        #search-container { margin: 2em 0; }
+        #searchInput { width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .periodo-grupo { margin-bottom: 1em; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #fff; }
+        .periodo-grupo summary { font-weight: bold; font-size: 1.2em; padding: 15px; cursor: pointer; outline: none; background-color: #f7f7f7; border-radius: 8px 8px 0 0; }
+        .disciplinas-grid { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .disciplina-item { display: flex; align-items: center; padding: 5px; border-radius: 4px; transition: background-color 0.2s; }
+        .disciplina-item:hover { background-color: #f0f8ff; }
+        .disciplina-item input { margin-right: 10px; transform: scale(1.2); }
+        .submit-button { display: block; width: 100%; padding: 15px; font-size: 1.2em; font-weight: bold; color: white; background-color: #004a99; border: none; border-radius: 5px; cursor: pointer; margin-top: 2em; }
+        .submit-button:hover { background-color: #003366; }
+        
+        /* NOVO CSS PARA A SELEÇÃO DE PERÍODO */
+        .config-section {
+            background-color: #e7f5ff;
+            border: 1px solid #bce0fd;
             border-radius: 8px;
-            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 2em;
         }
-        .periodo-grupo summary {
-            font-weight: bold;
-            font-size: 1.2em;
-            padding: 15px;
-            cursor: pointer;
-            outline: none;
-            background-color: #f7f7f7;
-            border-radius: 8px 8px 0 0;
+        .config-section h2 {
+            margin-top: 0;
+            font-size: 1.3em;
+            color: #003366;
         }
-        .disciplinas-grid {
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .disciplina-item {
-            display: flex; /* Alinha o checkbox com o texto */
-            align-items: center;
-            padding: 5px;
-            border-radius: 4px;
-            transition: background-color 0.2s;
-        }
-        .disciplina-item:hover {
-            background-color: #f0f8ff;
-        }
-        .disciplina-item input {
-            margin-right: 10px;
-            transform: scale(1.2);
-        }
-        .submit-button {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            font-size: 1.2em;
-            font-weight: bold;
-            color: white;
-            background-color: #004a99;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 2em;
-        }
-        .submit-button:hover {
-            background-color: #003366;
+        .radio-group label {
+            margin-right: 20px;
+            font-size: 1.1em;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Otimizador de Grade Horária</h1>
-        <p>Marque todas as disciplinas que você <strong>já concluiu</strong> e clique em "Gerar Grade".</p>
+        <p>Preencha as informações abaixo e clique em "Gerar Grade".</p>
         
         <form action="/gerar" method="post">
+            
+            <div class="config-section">
+                <h2>1. Qual seu próximo período letivo?</h2>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="proximo_periodo" value="impar" checked> Ímpar (ex: 2025.1)
+                    </label>
+                    <label>
+                        <input type="radio" name="proximo_periodo" value="par"> Par (ex: 2025.2)
+                    </label>
+                </div>
+            </div>
+
+            <h2>2. Marque as disciplinas que você já concluiu</h2>
             <div id="search-container">
                 <input type="text" id="searchInput" onkeyup="filtrarDisciplinas()" placeholder="Buscar disciplina pelo nome...">
             </div>
@@ -111,44 +81,9 @@
     </div>
 
     <script>
-        /**
-         * Normaliza um texto para busca, removendo acentos e convertendo para minúsculas.
-         * Ex: "Programação" -> "programacao"
-         */
-        function normalizarTexto(texto) {
-            return texto
-                .toLowerCase()
-                .normalize("NFD") // Separa os caracteres dos seus acentos (ex: 'á' -> 'a' + '´')
-                .replace(/[\u0300-\u036f]/g, ""); // Remove os acentos (diacríticos)
-        }
-
-        function filtrarDisciplinas() {
-            // Pega o termo da busca e já o normaliza para a comparação
-            const termoBusca = normalizarTexto(document.getElementById('searchInput').value);
-            
-            const grupos = document.querySelectorAll('.periodo-grupo');
-
-            grupos.forEach(grupo => {
-                const disciplinas = grupo.querySelectorAll('.disciplina-item');
-                
-                disciplinas.forEach(disciplina => {
-                    // Pega o texto da disciplina e também o normaliza
-                    const nomeDisciplina = normalizarTexto(disciplina.textContent);
-                    
-                    // Compara os textos já normalizados
-                    if (nomeDisciplina.includes(termoBusca)) {
-                        disciplina.style.display = 'flex'; // Mostra a disciplina
-                    } else {
-                        disciplina.style.display = 'none'; // Esconde a disciplina
-                    }
-                });
-
-                // Garante que todos os grupos fiquem abertos durante uma busca
-                if (termoBusca.length > 0) {
-                    grupo.open = true;
-                }
-            });
-        }
+        // ... (seu JavaScript de busca existente - sem alterações) ...
+        function normalizarTexto(texto) { return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
+        function filtrarDisciplinas() { const termoBusca = normalizarTexto(document.getElementById('searchInput').value); const grupos = document.querySelectorAll('.periodo-grupo'); grupos.forEach(grupo => { const disciplinas = grupo.querySelectorAll('.disciplina-item'); disciplinas.forEach(disciplina => { const nomeDisciplina = normalizarTexto(disciplina.textContent); if (nomeDisciplina.includes(termoBusca)) { disciplina.style.display = 'flex'; } else { disciplina.style.display = 'none'; } }); if (termoBusca.length > 0) { grupo.open = true; } }); }
     </script>
 
 </body>
