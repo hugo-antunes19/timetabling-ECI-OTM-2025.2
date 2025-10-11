@@ -129,5 +129,5 @@ def gerar_grade():
             grades_processadas[s] = {"creditos": creditos.get(s, 0), "grade_semanal": grade_semanal}
     return render_template('resultado.html', grades_processadas=grades_processadas, status=status_str, obj_value=obj_value)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+#if __name__ == '__main__':
+#    app.run(debug=True)
