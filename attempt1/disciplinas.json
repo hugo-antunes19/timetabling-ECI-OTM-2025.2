@@ -352,6 +352,27 @@
     "tipo": "8º Período"
   },
   {
+    "id": "EEWU00",
+    "nome": "Estágio Obrigatório",
+    "creditos": 2.0,
+    "prerequisitos": [],
+    "tipo": "9º Período"
+  },
+  {
+    "id": "ARTIFICIAL01",
+    "nome": "Escolha Livre",
+    "creditos": 4.0,
+    "prerequisitos": [],
+    "tipo": "10º Período"
+  },
+  {
+    "id": "ARTIFICIAL02",
+    "nome": "Escolha Livre",
+    "creditos": 4.0,
+    "prerequisitos": [],
+    "tipo": "10º Período"
+  },
+  {
     "id": "EEW002",
     "nome": "Sociedade de Debates I",
     "creditos": 0.0,
