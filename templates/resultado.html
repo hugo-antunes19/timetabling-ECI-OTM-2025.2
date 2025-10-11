@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Sua Grade Otimizada</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 2em;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: auto;
+        }
+        h1 { 
+            color: #003366; 
+            text-align: center;
+            border-bottom: 3px solid #003366;
+            padding-bottom: 10px;
+        }
+        h2 { 
+            color: #343a40; 
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 8px;
+            margin-top: 50px;
+        }
+        table.grade-semanal { 
+            border-collapse: collapse; 
+            width: 100%; 
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            table-layout: fixed;
+        }
+        .grade-semanal th, .grade-semanal td { 
+            border: 1px solid #dee2e6; 
+            padding: 10px; 
+            text-align: center; 
+            height: 80px;
+            vertical-align: top;
+        }
+        .grade-semanal thead { 
+            background-color: #003366; 
+            color: white;
+        }
+        .grade-semanal tbody tr:nth-child(even) { 
+            background-color: #fdfdfd; 
+        }
+        .grade-semanal td.horario-label {
+            font-weight: bold;
+            background-color: #f8f9fa;
+            width: 12%;
+        }
+        .materia-cell {
+            background-color: #e7f5ff;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+        .materia-cell small {
+            color: #555;
+        }
+        .mensagem {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #fffbe6;
+            border-left: 5px solid #ffc107;
+            margin-bottom: 2em;
+        }
+        .voltar {
+            display: inline-block;
+            margin-top: 2em;
+            padding: 10px 20px;
+            background-color: #003366;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Grade Horária Otimizada</h1>
+
+    {% if status == 'OPTIMAL' or status == 'FEASIBLE' %}
+        <div class="mensagem">
+            <strong>Solução encontrada!</strong> Mínimo de semestres para conclusão: <strong>{{ obj_value }}</strong>.
+        </div>
+
+        {# Definindo a ordem dos dias e horários para a tabela (APENAS PARA OS CABEÇALHOS) #}
+        {% set dias_display = {'SEG': 'Segunda-feira', 'TER': 'Terça-feira', 'QUA': 'Quarta-feira', 'QUI': 'Quinta-feira', 'SEX': 'Sexta-feira'} %}
+        {% set horarios_display = {'08-10': '08:00 - 10:00', '10-12': '10:00 - 12:00', '13-15': '13:00 - 15:00', '15-17': '15:00 - 17:00'} %}
+
+        {# Loop principal para cada semestre JÁ PROCESSADO pelo Python #}
+        {% for s, data in grades_processadas.items() %}
+            <h2>Semestre {{ s }} (Créditos: {{ data.creditos }})</h2>
+            <table class='grade-semanal'>
+                <thead>
+                    <tr>
+                        <th>Horário</th>
+                        {% for dia_key in dias_display %}
+                            <th>{{ dias_display[dia_key] }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for h_key, h_display in horarios_display.items() %}
+                    <tr>
+                        <td class='horario-label'>{{ h_display }}</td>
+                        {% for dia_key in dias_display %}
+                            {% set disciplina = data.grade_semanal[h_key][dia_key] %}
+                            {% if disciplina %}
+                                <td class='materia-cell'>
+                                    <b>{{ disciplina.nome }}</b><br>
+                                    <small>({{ disciplina.turma }})</small>
+                                </td>
+                            {% else %}
+                                <td class=''></td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+
+    {% else %}
+        <div class="mensagem" style="background-color: #f8d7da; border-left-color: #f5c6cb;">
+            <strong>Nenhuma solução foi encontrada.</strong>
+            <p>O modelo pode ser infactível com as disciplinas restantes ou o tempo limite foi atingido. Tente novamente com menos restrições ou marcando mais disciplinas como concluídas.</p>
+        </div>
+    {% endif %}
+    
+    <a href="/" class="voltar">Gerar Nova Grade</a>
+</div>
+</body>
+</html>

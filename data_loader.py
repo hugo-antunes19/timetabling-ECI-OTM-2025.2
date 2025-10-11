@@ -1,9 +1,11 @@
 # data_loader.py
 import json
 
-def carregar_dados(caminho_disciplinas, caminho_ofertas):
+# Adicione o parâmetro 'disciplinas_concluidas=[]'
+def carregar_dados(caminho_disciplinas, caminho_ofertas, disciplinas_concluidas=[]):
     """
-    Carrega os dados dos arquivos JSON, categoriza as disciplinas e realiza o pré-processamento.
+    Carrega os dados dos arquivos JSON, categoriza as disciplinas, realiza o pré-processamento
+    e remove as disciplinas já concluídas.
     Retorna um dicionário contendo todas as estruturas de dados necessárias.
     """
     with open(caminho_disciplinas, 'r', encoding='utf-8') as f:
@@ -11,7 +13,18 @@ def carregar_dados(caminho_disciplinas, caminho_ofertas):
     with open(caminho_ofertas, 'r', encoding='utf-8') as f:
         ofertas_data = json.load(f)
 
-    # --- MUDANÇA AQUI: Categorizar disciplinas antes de filtrar ---
+    # --- NOVA LÓGICA: Remover disciplinas concluídas da lista de dados ---
+    # Também remove os pré-requisitos que já foram satisfeitos
+    disciplinas_data_filtrado = []
+    for d in disciplinas_data:
+        if d['id'] not in disciplinas_concluidas:
+            # Remove pré-requisitos que o aluno já cumpriu
+            d['prerequisitos'] = [p for p in d.get('prerequisitos', []) if p not in disciplinas_concluidas]
+            disciplinas_data_filtrado.append(d)
+
+    # Continua a função usando a lista filtrada
+    disciplinas_data = disciplinas_data_filtrado
+
     obrigatorias_ids = []
     restritas_ids = []
     condicionadas_ids = []
@@ -19,24 +32,20 @@ def carregar_dados(caminho_disciplinas, caminho_ofertas):
 
     for d in disciplinas_data:
         tipo = d.get("tipo", "")
-        # Considera disciplinas de Períodos e Estágio/TCC como obrigatórias
         if "Período" in tipo:
             obrigatorias_ids.append(d["id"])
         elif "Escolha Restrita" in tipo:
             restritas_ids.append(d["id"])
         elif "Escolha Condicionada" in tipo:
             condicionadas_ids.append(d["id"])
-        # As disciplinas "ARTIFICIAL" que você criou caem aqui
         elif "Livre Escolha" in tipo or d["id"].startswith("ARTIFICIAL"):
             livres_ids.append(d["id"])
 
-    # Filtra as disciplinas para considerar apenas aquelas com ofertas
     disciplinas_ofertadas_ids = {o['disciplina_id'] for o in ofertas_data}
     disciplinas_filtradas = [d for d in disciplinas_data if d['id'] in disciplinas_ofertadas_ids]
     disciplinas = {d['id']: d for d in disciplinas_filtradas}
     print(f"Considerando {len(disciplinas)} disciplinas com ofertas disponíveis...")
 
-    # Mapeia turmas, horários e períodos
     turmas_por_disciplina = {d_id: [] for d_id in disciplinas}
     horarios_por_turma = {}
     periodos_validos_por_disciplina = {}
@@ -61,7 +70,6 @@ def carregar_dados(caminho_disciplinas, caminho_ofertas):
         "turmas_por_disciplina": turmas_por_disciplina,
         "horarios_por_turma": horarios_por_turma,
         "periodos_validos_por_disciplina": periodos_validos_por_disciplina,
-        # --- NOVO: Retorna as listas de IDs categorizados ---
         "obrigatorias_ids": [d_id for d_id in obrigatorias_ids if d_id in disciplinas],
         "restritas_ids": [d_id for d_id in restritas_ids if d_id in disciplinas],
         "condicionadas_ids": [d_id for d_id in condicionadas_ids if d_id in disciplinas],

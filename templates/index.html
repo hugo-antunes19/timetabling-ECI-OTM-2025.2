@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Otimizador de Grade Horária</title>
+    <style>
+        /* Você pode adicionar o CSS do seu arquivo grade_horaria.html aqui ou em um arquivo .css separado */
+        body { font-family: sans-serif; padding: 2em; }
+        .disciplinas-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .disciplina-item { display: block; }
+    </style>
+</head>
+<body>
+    <h1>Otimizador de Grade Horária</h1>
+    <p>Marque todas as disciplinas que você <strong>já concluiu</strong> e clique em "Gerar Grade".</p>
+    
+    <form action="/gerar" method="post">
+        <h2>Disciplinas Concluídas</h2>
+        <div class="disciplinas-grid">
+            {% for disciplina in disciplinas %}
+            <label class="disciplina-item">
+                <input type="checkbox" name="concluidas" value="{{ disciplina.id }}">
+                {{ disciplina.id }} - {{ disciplina.nome }}
+            </label>
+            {% endfor %}
+        </div>
+        <br>
+        <button type="submit">Gerar Grade Ideal</button>
+    </form>
+</body>
+</html>
