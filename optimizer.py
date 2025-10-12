@@ -2,7 +2,7 @@
 from ortools.sat.python import cp_model
 import json
 
-def resolver_grade(dados, creditos_minimos, NUM_SEMESTRES, CREDITOS_MAXIMOS_POR_SEMESTRE, proximo_periodo_tipo):
+def resolver_grade(dados, creditos_minimos, NUM_SEMESTRES, CREDITOS_MAXIMOS_POR_SEMESTRE, proximo_periodo_tipo, creditos_obrigatorios_concluidos):
     """
     Cria e resolve o modelo de otimização da grade horária.
     """
@@ -18,9 +18,11 @@ def resolver_grade(dados, creditos_minimos, NUM_SEMESTRES, CREDITOS_MAXIMOS_POR_
     livres_ids = dados["livres_ids"]
     ids_optativas = restritas_ids + condicionadas_ids + livres_ids
 
+    # CÓDIGO CORRIGIDO em optimizer.py
     with open('./data/disciplinas.json', 'r', encoding='utf-8') as f:
         todas_disciplinas = json.load(f)
-        total_creditos_obrigatorios = sum(d.get('creditos', 0) for d in todas_disciplinas if "Período" in d.get('tipo', ''))
+        # Converte cada crédito para inteiro durante a soma
+        total_creditos_obrigatorios = sum(int(d.get('creditos', 0)) for d in todas_disciplinas if "Período" in d.get('tipo', '')) # <--- CORREÇÃO AQUI
     creditos_para_estagio_threshold = int(total_creditos_obrigatorios / 2)
 
     alocacao = {}
@@ -79,8 +81,10 @@ def resolver_grade(dados, creditos_minimos, NUM_SEMESTRES, CREDITOS_MAXIMOS_POR_
     creditos_acumulados_por_semestre = {s: model.NewIntVar(0, 500, f'creditos_acumulados_s{s}') for s in range(NUM_SEMESTRES + 1)}
     model.Add(creditos_acumulados_por_semestre[0] == 0)
     for s in range(1, NUM_SEMESTRES + 1):
-        creditos_neste_semestre_expr = sum(int(disciplinas[d_id]['creditos']) * var for (d_id, sem, t_id), var in alocacao.items() if sem == s)
+        # Esta parte calcula os créditos que o OTIMIZADOR está alocando
+        creditos_neste_semestre_expr = sum(int(disciplinas[d_id]['creditos']) * var for (d_id, sem, t_id), var in alocacao.items() if sem == s and "Período" in disciplinas[d_id].get('tipo', ''))
         model.Add(creditos_acumulados_por_semestre[s] == creditos_acumulados_por_semestre[s-1] + creditos_neste_semestre_expr)
+    
     id_estagio = "EEWU00"
     if id_estagio in disciplinas:
         for s in range(1, NUM_SEMESTRES + 1):
@@ -89,7 +93,10 @@ def resolver_grade(dados, creditos_minimos, NUM_SEMESTRES, CREDITOS_MAXIMOS_POR_
                 estagio_cursado_em_s = model.NewBoolVar(f'estagio_cursado_em_s{s}')
                 model.Add(sum(estagio_neste_semestre_vars) >= 1).OnlyEnforceIf(estagio_cursado_em_s)
                 model.Add(sum(estagio_neste_semestre_vars) == 0).OnlyEnforceIf(estagio_cursado_em_s.Not())
-                model.Add(creditos_acumulados_por_semestre[s-1] >= creditos_para_estagio_threshold).OnlyEnforceIf(estagio_cursado_em_s)
+                
+                # --- MUDANÇA PRINCIPAL NA RESTRIÇÃO ---
+                # Agora, somamos os créditos que você JÁ FEZ com os que o modelo está ACUMULANDO.
+                model.Add(creditos_obrigatorios_concluidos + creditos_acumulados_por_semestre[s-1] >= creditos_para_estagio_threshold).OnlyEnforceIf(estagio_cursado_em_s)
 
     # --- 5. Definir a Função Objetivo (CORRIGIDO) ---
     semestre_maximo = model.NewIntVar(1, NUM_SEMESTRES + 1, 'semestre_maximo')

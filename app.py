@@ -71,11 +71,20 @@ def gerar_grade():
         return "Erro: 'disciplinas.json' não encontrado para calcular créditos.", 500
 
     creditos_concluidos = {"restrita": 0, "condicionada": 0, "livre": 0}
+    # --- INÍCIO DA MUDANÇA ---
+    creditos_obrigatorios_concluidos = 0
+
     for disciplina_id in disciplinas_concluidas_ids:
         if disciplina_id in todas_disciplinas_info:
             disciplina = todas_disciplinas_info[disciplina_id]
             tipo = disciplina.get('tipo', '')
-            creditos = disciplina.get('creditos', 0)
+            creditos = int(disciplina.get('creditos', 0))
+            
+            # Adiciona ao contador de créditos obrigatórios se o tipo for de um período
+            if "Período" in tipo:
+                creditos_obrigatorios_concluidos += creditos
+
+            # O resto do cálculo de optativas continua igual
             if "Restrita" in tipo: creditos_concluidos["restrita"] += creditos
             elif "Condicionada" in tipo: creditos_concluidos["condicionada"] += creditos
             elif "Livre" in tipo or disciplina_id.startswith("ARTIFICIAL"): creditos_concluidos["livre"] += creditos
@@ -84,6 +93,7 @@ def gerar_grade():
         categoria: int(max(0, CREDITOS_MINIMOS_TOTAIS[categoria] - creditos_concluidos[categoria]))
         for categoria in CREDITOS_MINIMOS_TOTAIS
     }
+    print(f"Créditos obrigatórios já concluídos: {creditos_obrigatorios_concluidos}") # Linha de depuração útil
     print(f"Créditos restantes a serem cumpridos: {creditos_restantes}")
     
     try:
@@ -91,13 +101,14 @@ def gerar_grade():
     except FileNotFoundError as e:
         return f"Erro ao carregar arquivos de dados: {e}", 500
 
-    # --- MUDANÇA AQUI: Passa a nova informação para o otimizador ---
+    # --- MUDANÇA NA CHAMADA DA FUNÇÃO ---
     grade_result, creditos, status, obj_value = resolver_grade(
         dados, 
         creditos_restantes, 
         NUM_SEMESTRES, 
         CREDITOS_MAXIMOS_POR_SEMESTRE,
-        proximo_periodo_tipo  # Novo argumento!
+        proximo_periodo_tipo,
+        creditos_obrigatorios_concluidos  # Novo argumento!
     )
     
     # (O resto da função continua igual...)
