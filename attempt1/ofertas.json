@@ -403,6 +403,12 @@
     "periodo": "1"
     },
     {
+    "disciplina_id": "EEL970",
+    "turma_id": "EEL970T2",
+    "horario": ["SEG-13-15", "QUA-13-15"],
+    "periodo": "1"
+    },
+    {
     "disciplina_id": "COS013",
     "turma_id": "COS013T1",
     "horario": ["TER-10-12", "QUI-10-12"],
@@ -483,7 +489,7 @@
     {
     "disciplina_id": "EEL193",
     "turma_id": "EEL193T1",
-    "horario": ["QUA-08-10", "SEG-10-12"],
+    "horario": ["QUA-10-12", "SEG-10-12"],
     "periodo": "1, 2"
     },
     {
@@ -3917,7 +3923,13 @@
             "SEX-15-17"
         ],
         "periodo": "1,2"
+    },
+    {
+        "disciplina_id": "COP481",
+        "turma_id": "COP481T01",
+        "horario": [
+            "TER-13-15"
+        ],
+        "periodo": "1,2"
     }
-    
-    
   ]
