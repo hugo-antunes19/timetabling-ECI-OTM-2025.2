@@ -1,0 +1,274 @@
+# app.py
+import streamlit as st
+import time
+import json
+import pandas as pd
+from ortools.linear_solver import pywraplp
+from data_loader import carregar_dados
+from optimizerMILP import resolver_grade
+
+# --- Constantes do Modelo ---
+CAMINHO_DISCIPLINAS = '../attempt1/disciplinas.json'
+CAMINHO_OFERTAS = '../attempt1/ofertas.json'
+CREDITOS_MAXIMOS_POR_SEMESTRE = 32
+CREDITOS_MINIMOS_TOTAIS = {
+    "restrita": 4,
+    "condicionada": 40,
+    "livre": 8
+}
+
+# --- Cache ---
+@st.cache_data
+def carregar_dados_cached():
+    try:
+        return carregar_dados(CAMINHO_DISCIPLINAS, CAMINHO_OFERTAS)
+    except FileNotFoundError as e:
+        st.error(f"Erro ao carregar dados: {e}")
+        return None
+
+# --- Função da Grade Horária (Sem Mudanças) ---
+def criar_grade_semanal(disciplinas_do_semestre):
+    """
+    Cria um DataFrame do Pandas formatado como grade horária.
+    Assume que os horários estão no formato "DIA-HH-HH" (ex: "SEG-08-10").
+    """
+    
+    # Ajuste esta lista para cobrir todos os seus horários possíveis
+    dias_semana = ["SEG", "TER", "QUA", "QUI", "SEX", "SAB"]
+    slots_horas = [
+        "08-10", "10-12", "13-15", "15-17", 
+        "17-19", "19-21", "21-23" # Adapte conforme seus dados
+    ]
+    
+    # Garante que todos os slots de horário reais sejam indexados
+    slots_presentes = set(slots_horas)
+    for d in disciplinas_do_semestre:
+        for h in d["horarios"]:
+            try:
+                partes = h.split("-")
+                if len(partes) == 3:
+                    slot = f"{partes[1]}-{partes[2]}"
+                    slots_presentes.add(slot)
+            except Exception:
+                pass # Ignora erros de parsing aqui
+    
+    # Usa a lista ordenada de slots
+    slots_index = sorted(list(slots_presentes))
+    if not slots_index: # Caso não haja horários
+        slots_index = slots_horas
+        
+    df = pd.DataFrame(index=slots_index, columns=dias_semana).fillna("")
+
+    for disciplina in disciplinas_do_semestre:
+        nome_disciplina = disciplina["nome"]
+        turma = disciplina["turma"]
+        
+        for horario_str in disciplina["horarios"]:
+            try:
+                partes = horario_str.split("-")
+                if len(partes) == 3:
+                    dia = partes[0]
+                    slot = f"{partes[1]}-{partes[2]}"
+                else:
+                    raise ValueError("Formato de horário inesperado")
+
+                if dia in df.columns and slot in df.index:
+                    if df.loc[slot, dia] == "":
+                        df.loc[slot, dia] = f"{nome_disciplina} (Turma: {turma})"
+                    else:
+                        df.loc[slot, dia] += f" / {nome_disciplina} (Turma: {turma})" 
+                else:
+                    st.warning(f"Horário '{horario_str}' está fora da grade definida (dia='{dia}', slot='{slot}').")
+            except Exception as e:
+                st.warning(f"Não foi possível parsear o horário: '{horario_str}'. Erro: {e}")
+
+    return df
+
+# --- Interface da Aplicação ---
+st.set_page_config(layout="wide")
+st.title("🎓 Otimizador de Grade Horária")
+st.write("Selecione as disciplinas que você já concluiu e seu próximo semestre para otimizar sua rota de graduação.")
+
+# Carrega os dados (usando o cache)
+dados = carregar_dados_cached()
+if not dados:
+    st.stop()
+
+# --- Entradas do Usuário (REESTRUTURADO) ---
+st.header("1. Suas Informações")
+
+# Carrega TODAS as disciplinas para a seleção
+try:
+    with open(CAMINHO_DISCIPLINAS, 'r', encoding='utf-8') as f:
+        todas_disciplinas_data = json.load(f)
+except Exception as e:
+    st.error(f"Não foi possível ler o arquivo de disciplinas para a seleção: {e}")
+    st.stop()
+
+# Organiza as disciplinas por tipo/período
+obrigatorias_por_periodo = {}
+opt_restritas = []
+opt_condicionadas = []
+opt_livres = []
+outras = []
+
+for d in todas_disciplinas_data:
+    tipo = d.get("tipo", "")
+    # O item da opção agora é o par (label, id)
+    opcao = (f"{d['id']} - {d.get('nome', 'Nome Desconhecido')}", d['id'])
+    
+    if "Período" in tipo:
+        if tipo not in obrigatorias_por_periodo:
+            obrigatorias_por_periodo[tipo] = []
+        obrigatorias_por_periodo[tipo].append(opcao)
+    elif "Escolha Restrita" in tipo:
+        opt_restritas.append(opcao)
+    elif "Escolha Condicionada" in tipo:
+        opt_condicionadas.append(opcao)
+    elif "Livre Escolha" in tipo or d["id"].startswith("ARTIFICIAL"):
+        opt_livres.append(opcao)
+    else:
+        outras.append(opcao) # Para disciplinas sem tipo (Estágio, TCC, etc.)
+
+# --- NOVO: Agrupa todas as seções ---
+st.subheader("Disciplinas Concluídas")
+st.write("Marque todas as disciplinas que você já cursou e foi aprovado.")
+
+# Agrupa todas as listas de opções em um dicionário para facilitar
+grupos_de_selecao = {}
+# Adiciona as obrigatórias ordenadas
+for periodo in sorted(obrigatorias_por_periodo.keys()):
+    grupos_de_selecao[f"Obrigatórias - {periodo}"] = obrigatorias_por_periodo[periodo]
+# Adiciona as optativas e outras
+grupos_de_selecao["Optativas - Escolha Restrita"] = opt_restritas
+grupos_de_selecao["Optativas - Escolha Condicionada"] = opt_condicionadas
+grupos_de_selecao["Optativas - Livre Escolha"] = opt_livres
+if outras:
+    grupos_de_selecao["Outras (Estágio, TCC, etc.)"] = outras
+
+# --- NOVO: Loop dinâmico com st.session_state ---
+for titulo_grupo, opcoes_grupo in grupos_de_selecao.items():
+    
+    # Cria uma chave única para o session_state
+    chave_estado = f"select_{titulo_grupo}"
+    
+    # Inicializa o estado de seleção para este grupo, se ainda não existir
+    if chave_estado not in st.session_state:
+        st.session_state[chave_estado] = []
+
+    with st.expander(titulo_grupo):
+        
+        # Cria colunas para os botões
+        col1, col2, col_vazia = st.columns([1, 1, 3])
+        
+        # Botão "Selecionar Tudo"
+        with col1:
+            if st.button(f"Selecionar Tudo", key=f"btn_all_{chave_estado}"):
+                # Define o estado como a lista completa de opções
+                st.session_state[chave_estado] = opcoes_grupo
+                st.rerun() # <<< CORREÇÃO AQUI
+        
+        # Botão "Limpar"
+        with col2:
+            if st.button(f"Limpar", key=f"btn_clear_{chave_estado}"):
+                # Define o estado como uma lista vazia
+                st.session_state[chave_estado] = []
+                st.rerun() # Força o rerun
+
+        # O multiselect agora usa 'key' para ler e escrever no st.session_state
+        st.multiselect(
+            f"Selecione as disciplinas ({titulo_grupo}):",
+            options=opcoes_grupo,
+            format_func=lambda x: x[0], # Mostra o label "ID - Nome"
+            key=chave_estado, # Vincula o widget ao session_state
+            label_visibility="collapsed" # Esconde o label, já que o expander tem o título
+        )
+
+# --- Coleta dos IDs (Modificado) ---
+# Itera pelo session_state para pegar TODOS os IDs de TODAS as seleções
+all_selected_ids = set()
+for key, selected_items in st.session_state.items():
+    if key.startswith("select_"): # Filtra apenas as chaves de seleção
+        for item in selected_items:
+            all_selected_ids.add(item[1]) # Adiciona o ID (item[1]) ao set
+
+disciplinas_concluidas_ids = list(all_selected_ids)
+
+
+# --- Seção do Semestre Inicial (Sem Mudanças) ---
+st.subheader("Próximo Semestre")
+semestre_inicio = st.number_input(
+    "Qual o NÚMERO do seu próximo semestre? (Ex: 1, 2, 3...)",
+    min_value=1,
+    max_value=14,
+    value=1
+)
+st.warning(f"Otimizador irá considerar que você está começando o **{semestre_inicio}º semestre**. O algoritmo verificará a paridade (ímpar/par) automaticamente.")
+
+
+# --- Botão para Executar (Sem Mudanças) ---
+st.header("2. Gerar Grade")
+
+if st.button("Encontrar Grade Otimizada", type="primary"):
+    start_time = time.time()
+    
+    with st.spinner("Calculando a melhor rota... O solver MILP está trabalhando. Isso pode levar alguns minutos..."):
+        
+        grade, creditos, status, obj_value = resolver_grade(
+            dados, 
+            CREDITOS_MINIMOS_TOTAIS, 
+            CREDITOS_MAXIMOS_POR_SEMESTRE,
+            disciplinas_concluidas_ids,
+            semestre_inicio
+        )
+
+    end_time = time.time()
+    st.info(f"Cálculo concluído em {end_time - start_time:.2f} segundos.")
+
+    # --- 3. Exibir Resultados (Sem Mudanças) ---
+    st.header("3. Resultados")
+
+    if status == pywraplp.Solver.OPTIMAL or status == pywraplp.Solver.FEASIBLE:
+        
+        semestres_restantes = (int(obj_value) - semestre_inicio) + 1
+        
+        st.success("🎉 Solução encontrada!")
+        
+        col1, col2 = st.columns(2)
+        col1.metric(
+            label="Número Mínimo de Semestres Restantes", 
+            value=f"{semestres_restantes} Semestres"
+        )
+        col2.metric(
+            label="Semestre de Conclusão Previsto",
+            value=f"{int(obj_value)}º Semestre"
+        )
+
+        st.subheader("Grade Horária Sugerida:")
+        
+        for s in sorted(grade.keys()):
+            st.markdown(f"---")
+            st.markdown(f"#### Semestre {s} (Total: {creditos[s]} créditos)")
+            
+            disciplinas_do_semestre = grade[s]
+            
+            if disciplinas_do_semestre:
+                df_grade = criar_grade_semanal(disciplinas_do_semestre)
+                st.dataframe(df_grade, use_container_width=True)
+                
+                with st.expander("Lista de disciplinas deste semestre"):
+                    for d in disciplinas_do_semestre:
+                        st.markdown(f"- **{d['nome']}** (Turma: {d['turma']}, Créditos: {d['creditos']})")
+            else:
+                st.write("Nenhuma disciplina alocada neste semestre.")
+
+    elif status == pywraplp.Solver.INFEASIBLE:
+        st.error("Nenhuma solução encontrada: O modelo é infactível.")
+        st.write("Isso pode acontecer por algumas razões:")
+        st.write("* Não há como cumprir os créditos mínimos restantes no tempo limite.")
+        st.write("* Os pré-requisitos não podem ser satisfeitos.")
+        st.write("* O limite de créditos por semestre é muito baixo.")
+        st.write("* Não existem turmas/horários que não conflitem.")
+
+    else:
+        st.error(f"Nenhuma solução encontrada: O solver parou por outro motivo (status: {status}).")
