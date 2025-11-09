@@ -4,10 +4,14 @@ import time
 import json
 import pandas as pd
 from ortools.linear_solver import pywraplp
+
+# Importa as funções dos seus outros arquivos .py
+# Certifique-se que data_loader.py e optimizerMILP.py estão na mesma pasta
 from data_loader import carregar_dados
 from optimizerMILP import resolver_grade
 
 # --- Constantes do Modelo ---
+# (Estou usando os caminhos do seu último optimizerMILP.py)
 CAMINHO_DISCIPLINAS = '../attempt1/disciplinas.json'
 CAMINHO_OFERTAS = '../attempt1/ofertas.json'
 CREDITOS_MAXIMOS_POR_SEMESTRE = 32
@@ -20,29 +24,32 @@ CREDITOS_MINIMOS_TOTAIS = {
 # Ajuste este valor para a realidade do seu currículo (ex: 240)
 TOTAL_CREDITOS_CURSO = 240 
 
-# --- MUDANÇA: Carregar o JSON completo aqui ---
+# --- Carregamento do JSON Completo ---
+# Usado para popular a UI e para a contagem correta de créditos
 try:
     with open(CAMINHO_DISCIPLINAS, 'r', encoding='utf-8') as f:
         TODAS_DISCIPLINAS_INFO = {d['id']: d for d in json.load(f)}
 except Exception as e:
     st.error(f"ERRO CRÍTICO: Não foi possível ler {CAMINHO_DISCIPLINAS}. {e}")
     st.stop()
-# --- FIM DA MUDANÇA ---
 
-
-@st.cache_data
-def carregar_dados_cached():
+# --- MUDANÇA (FIX DO CACHE) ---
+# O @st.cache_data foi REMOVIDO para forçar o recarregamento
+# A função agora aceita as disciplinas concluídas para pré-filtrar os dados
+def carregar_dados_filtrados(disciplinas_concluidas_ids):
     """
-    Carrega os dados dos arquivos JSON.
-    NOTA: Este loader ainda filtra disciplinas sem oferta,
-    o que é CORRETO para o solver (que só pode alocar o que é ofertado).
-    A contagem de créditos será feita separadamente.
+    Carrega os dados dos arquivos JSON e JÁ FILTRA as disciplinas concluídas,
+    imitando o comportamento do data_loader do app Flask (CP-SAT).
     """
     try:
-        return carregar_dados(CAMINHO_DISCIPLINAS, CAMINHO_OFERTAS)
+        # Passa as disciplinas concluídas para o loader
+        return carregar_dados(CAMINHO_DISCIPLINAS, CAMINHO_OFERTAS, 
+                              disciplinas_concluidas=disciplinas_concluidas_ids)
     except FileNotFoundError as e:
         st.error(f"Erro ao carregar dados: {e}")
         return None
+# --- FIM DA MUDANÇA ---
+
 
 # --- Função da Grade Horária (Corrigida para "DIA-HH-HH") ---
 def criar_grade_semanal(disciplinas_do_semestre):
@@ -50,15 +57,12 @@ def criar_grade_semanal(disciplinas_do_semestre):
     Cria um DataFrame do Pandas formatado como grade horária.
     Assume que os horários estão no formato "DIA-HH-HH" (ex: "SEG-08-10").
     """
-    
-    # Ajuste esta lista para cobrir todos os seus horários possíveis
     dias_semana = ["SEG", "TER", "QUA", "QUI", "SEX", "SAB"]
     slots_horas = [
         "08-10", "10-12", "13-15", "15-17", 
-        "17-19", "19-21", "21-23" # Adapte conforme seus dados
+        "17-19", "19-21", "21-23" 
     ]
     
-    # Garante que todos os slots de horário reais sejam indexados
     slots_presentes = set(slots_horas)
     for d in disciplinas_do_semestre:
         for h in d["horarios"]:
@@ -67,27 +71,23 @@ def criar_grade_semanal(disciplinas_do_semestre):
                 if len(partes) == 3:
                     slot = f"{partes[1]}-{partes[2]}"
                     slots_presentes.add(slot)
-            except Exception:
-                pass 
+            except Exception: pass 
     
     slots_index = sorted(list(slots_presentes))
-    if not slots_index: 
-        slots_index = slots_horas
+    if not slots_index: slots_index = slots_horas
         
     df = pd.DataFrame(index=slots_index, columns=dias_semana).fillna("")
 
     for disciplina in disciplinas_do_semestre:
         nome_disciplina = disciplina["nome"]
         turma = disciplina["turma"]
-        
         for horario_str in disciplina["horarios"]:
             try:
                 partes = horario_str.split("-")
                 if len(partes) == 3:
                     dia = partes[0]
                     slot = f"{partes[1]}-{partes[2]}"
-                else:
-                    raise ValueError("Formato de horário inesperado")
+                else: raise ValueError("Formato de horário inesperado")
 
                 if dia in df.columns and slot in df.index:
                     if df.loc[slot, dia] == "":
@@ -95,10 +95,9 @@ def criar_grade_semanal(disciplinas_do_semestre):
                     else:
                         df.loc[slot, dia] += f" / {nome_disciplina} (Turma: {turma})" 
                 else:
-                    st.warning(f"Horário '{horario_str}' está fora da grade definida (dia='{dia}', slot='{slot}').")
+                    st.warning(f"Horário '{horario_str}' está fora da grade (dia='{dia}', slot='{slot}').")
             except Exception as e:
                 st.warning(f"Não foi possível parsear o horário: '{horario_str}'. Erro: {e}")
-
     return df
 
 # --- Interface da Aplicação ---
@@ -106,15 +105,10 @@ st.set_page_config(layout="wide")
 st.title("🎓 Otimizador de Grade Horária")
 st.write("Selecione as disciplinas que você já concluiu e seu próximo semestre para otimizar sua rota de graduação.")
 
-# Carrega os dados (usando o cache)
-dados = carregar_dados_cached()
-if not dados:
-    st.stop()
-
 # --- Entradas do Usuário (com botões Selecionar/Limpar) ---
 st.header("1. Suas Informações")
 
-# (O JSON completo já foi carregado em TODAS_DISCIPLINAS_INFO)
+# Popula a UI de seleção a partir do JSON completo
 obrigatorias_por_periodo = {}
 opt_restritas = []
 opt_condicionadas = []
@@ -126,17 +120,12 @@ for d_id, d in TODAS_DISCIPLINAS_INFO.items():
     opcao = (f"{d['id']} - {d.get('nome', 'Nome Desconhecido')}", d['id'])
     
     if "Período" in tipo:
-        if tipo not in obrigatorias_por_periodo:
-            obrigatorias_por_periodo[tipo] = []
+        if tipo not in obrigatorias_por_periodo: obrigatorias_por_periodo[tipo] = []
         obrigatorias_por_periodo[tipo].append(opcao)
-    elif "Escolha Restrita" in tipo:
-        opt_restritas.append(opcao)
-    elif "Escolha Condicionada" in tipo:
-        opt_condicionadas.append(opcao)
-    elif "Livre Escolha" in tipo or d["id"].startswith("ARTIFICIAL"):
-        opt_livres.append(opcao)
-    else:
-        outras.append(opcao) 
+    elif "Escolha Restrita" in tipo: opt_restritas.append(opcao)
+    elif "Escolha Condicionada" in tipo: opt_condicionadas.append(opcao)
+    elif "Livre Escolha" in tipo or d["id"].startswith("ARTIFICIAL"): opt_livres.append(opcao)
+    else: outras.append(opcao) 
 
 st.subheader("Disciplinas Concluídas")
 st.write("Marque todas as disciplinas que você já cursou e foi aprovado.")
@@ -172,12 +161,12 @@ for titulo_grupo, opcoes_grupo in grupos_de_selecao.items():
             label_visibility="collapsed"
         )
 
+# Coleta os IDs selecionados
 all_selected_ids = set()
 for key, selected_items in st.session_state.items():
     if key.startswith("select_"):
         for item in selected_items:
             all_selected_ids.add(item[1]) 
-
 disciplinas_concluidas_ids = list(all_selected_ids)
 
 st.subheader("Próximo Semestre")
@@ -195,12 +184,20 @@ st.header("2. Gerar Grade")
 if st.button("Encontrar Grade Otimizada", type="primary"):
     start_time = time.time()
     
+    # --- MUDANÇA: Carrega os dados AQUI, após o input do usuário ---
+    # Isso passa a lista de concluídas para o loader, que filtra os dados
+    dados = carregar_dados_filtrados(disciplinas_concluidas_ids)
+    if not dados:
+        st.error("Falha ao carregar dados. Verifique os logs.")
+        st.stop()
+    # --- FIM DA MUDANÇA ---
+    
     with st.spinner("Calculando a melhor rota... O solver MILP está trabalhando. Isso pode levar alguns minutos..."):
         
-        # --- MUDANÇA: Passar TODAS_DISCIPLINAS_INFO como novo argumento ---
+        # A chamada de 7 argumentos está correta (como corrigimos antes)
         grade, creditos, status, obj_value = resolver_grade(
             dados, 
-            TODAS_DISCIPLINAS_INFO, # <-- NOVO ARGUMENTO
+            TODAS_DISCIPLINAS_INFO, # (Para contagem de créditos)
             CREDITOS_MINIMOS_TOTAIS, 
             CREDITOS_MAXIMOS_POR_SEMESTRE,
             disciplinas_concluidas_ids,
