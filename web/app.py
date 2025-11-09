@@ -17,6 +17,10 @@ CREDITOS_MINIMOS_TOTAIS = {
     "livre": 8
 }
 
+# --- NOVO: Defina o total de créditos do seu curso ---
+# Ajuste este valor para a realidade do seu currículo (ex: 240)
+TOTAL_CREDITOS_CURSO = 240 
+
 # --- Cache ---
 @st.cache_data
 def carregar_dados_cached():
@@ -26,7 +30,7 @@ def carregar_dados_cached():
         st.error(f"Erro ao carregar dados: {e}")
         return None
 
-# --- Função da Grade Horária (Sem Mudanças) ---
+# --- Função da Grade Horária (Corrigida para "DIA-HH-HH") ---
 def criar_grade_semanal(disciplinas_do_semestre):
     """
     Cria um DataFrame do Pandas formatado como grade horária.
@@ -94,7 +98,7 @@ dados = carregar_dados_cached()
 if not dados:
     st.stop()
 
-# --- Entradas do Usuário (REESTRUTURADO) ---
+# --- Entradas do Usuário (com botões Selecionar/Limpar) ---
 st.header("1. Suas Informações")
 
 # Carrega TODAS as disciplinas para a seleção
@@ -130,7 +134,7 @@ for d in todas_disciplinas_data:
     else:
         outras.append(opcao) # Para disciplinas sem tipo (Estágio, TCC, etc.)
 
-# --- NOVO: Agrupa todas as seções ---
+# --- Agrupa todas as seções ---
 st.subheader("Disciplinas Concluídas")
 st.write("Marque todas as disciplinas que você já cursou e foi aprovado.")
 
@@ -146,7 +150,7 @@ grupos_de_selecao["Optativas - Livre Escolha"] = opt_livres
 if outras:
     grupos_de_selecao["Outras (Estágio, TCC, etc.)"] = outras
 
-# --- NOVO: Loop dinâmico com st.session_state ---
+# --- Loop dinâmico com st.session_state ---
 for titulo_grupo, opcoes_grupo in grupos_de_selecao.items():
     
     # Cria uma chave única para o session_state
@@ -166,14 +170,14 @@ for titulo_grupo, opcoes_grupo in grupos_de_selecao.items():
             if st.button(f"Selecionar Tudo", key=f"btn_all_{chave_estado}"):
                 # Define o estado como a lista completa de opções
                 st.session_state[chave_estado] = opcoes_grupo
-                st.rerun() # <<< CORREÇÃO AQUI
+                st.rerun() # Corrigido de experimental_rerun
         
         # Botão "Limpar"
         with col2:
             if st.button(f"Limpar", key=f"btn_clear_{chave_estado}"):
                 # Define o estado como uma lista vazia
                 st.session_state[chave_estado] = []
-                st.rerun() # Força o rerun
+                st.rerun() # Corrigido de experimental_rerun
 
         # O multiselect agora usa 'key' para ler e escrever no st.session_state
         st.multiselect(
@@ -184,8 +188,7 @@ for titulo_grupo, opcoes_grupo in grupos_de_selecao.items():
             label_visibility="collapsed" # Esconde o label, já que o expander tem o título
         )
 
-# --- Coleta dos IDs (Modificado) ---
-# Itera pelo session_state para pegar TODOS os IDs de TODAS as seleções
+# --- Coleta dos IDs ---
 all_selected_ids = set()
 for key, selected_items in st.session_state.items():
     if key.startswith("select_"): # Filtra apenas as chaves de seleção
@@ -195,7 +198,7 @@ for key, selected_items in st.session_state.items():
 disciplinas_concluidas_ids = list(all_selected_ids)
 
 
-# --- Seção do Semestre Inicial (Sem Mudanças) ---
+# --- Seção do Semestre Inicial ---
 st.subheader("Próximo Semestre")
 semestre_inicio = st.number_input(
     "Qual o NÚMERO do seu próximo semestre? (Ex: 1, 2, 3...)",
@@ -203,10 +206,10 @@ semestre_inicio = st.number_input(
     max_value=14,
     value=1
 )
-st.warning(f"Otimizador irá considerar que você está começando o **{semestre_inicio}º semestre**. O algoritmo verificará a paridade (ímpar/par) automaticamente.")
+st.warning(f"Otimizador irá considerar que você está começando o **{semestre_inicio}º semestre**.")
 
 
-# --- Botão para Executar (Sem Mudanças) ---
+# --- Botão para Executar ---
 st.header("2. Gerar Grade")
 
 if st.button("Encontrar Grade Otimizada", type="primary"):
@@ -219,13 +222,14 @@ if st.button("Encontrar Grade Otimizada", type="primary"):
             CREDITOS_MINIMOS_TOTAIS, 
             CREDITOS_MAXIMOS_POR_SEMESTRE,
             disciplinas_concluidas_ids,
-            semestre_inicio
+            semestre_inicio,
+            TOTAL_CREDITOS_CURSO  # <<< Novo parâmetro
         )
 
     end_time = time.time()
     st.info(f"Cálculo concluído em {end_time - start_time:.2f} segundos.")
 
-    # --- 3. Exibir Resultados (Sem Mudanças) ---
+    # --- 3. Exibir Resultados ---
     st.header("3. Resultados")
 
     if status == pywraplp.Solver.OPTIMAL or status == pywraplp.Solver.FEASIBLE:
@@ -266,7 +270,7 @@ if st.button("Encontrar Grade Otimizada", type="primary"):
         st.error("Nenhuma solução encontrada: O modelo é infactível.")
         st.write("Isso pode acontecer por algumas razões:")
         st.write("* Não há como cumprir os créditos mínimos restantes no tempo limite.")
-        st.write("* Os pré-requisitos não podem ser satisfeitos.")
+        st.write("* Os pré-requisitos não podem ser satisfeitos (verifique as disciplinas concluídas).")
         st.write("* O limite de créditos por semestre é muito baixo.")
         st.write("* Não existem turmas/horários que não conflitem.")
 
