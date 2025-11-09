@@ -1,8 +1,7 @@
-# optimizerMILP.py (A VERSÃO CORRETA E COMPLETA)
-
+# optimizerMILP.py
 from ortools.linear_solver import pywraplp
 
-# --- MUDANÇA: Adicionar 'todas_disciplinas_info' ---
+# --- CORREÇÃO: Assinatura de 7 argumentos ---
 def resolver_grade(dados, todas_disciplinas_info, creditos_minimos, 
                    CREDITOS_MAXIMOS_POR_SEMESTRE, 
                    disciplinas_concluidas_ids, semestre_inicio, 
@@ -20,7 +19,6 @@ def resolver_grade(dados, todas_disciplinas_info, creditos_minimos,
 
     # --- 1. Extrair Dados Brutos ---
     # 'disciplinas' é a lista FILTRADA (com ofertas), vinda do 'dados'.
-    # Isso é correto para o solver alocar.
     disciplinas = dados["disciplinas"]
     turmas_por_disciplina = dados["turmas_por_disciplina"]
     horarios_por_turma = dados["horarios_por_turma"]
@@ -38,7 +36,7 @@ def resolver_grade(dados, todas_disciplinas_info, creditos_minimos,
     optativas_a_cursar = [d_id for d_id in ids_optativas_total if d_id not in disciplinas_concluidas_ids]
     disciplinas_a_cursar_ids = obrigatorias_a_cursar + optativas_a_cursar
 
-    # --- MUDANÇA: Usar 'todas_disciplinas_info' para a contagem ---
+    # --- CORREÇÃO: Usar 'todas_disciplinas_info' para a contagem ---
     creditos_feitos = {"restrita": 0, "condicionada": 0, "livre": 0}
     creditos_concluidos_pelo_usuario = 0
     for d_id in disciplinas_concluidas_ids:
@@ -48,7 +46,7 @@ def resolver_grade(dados, todas_disciplinas_info, creditos_minimos,
             credito_disciplina = int(disciplina.get('creditos', 0))
             creditos_concluidos_pelo_usuario += credito_disciplina
             
-            # Identifica o tipo (Lógica do CP-SAT para consistência)
+            # Identifica o tipo
             tipo = disciplina.get("tipo", "")
             if "Restrita" in tipo:
                 creditos_feitos["restrita"] += credito_disciplina
@@ -56,7 +54,7 @@ def resolver_grade(dados, todas_disciplinas_info, creditos_minimos,
                 creditos_feitos["condicionada"] += credito_disciplina
             elif "Livre" in tipo or d_id.startswith("ARTIFICIAL"):
                 creditos_feitos["livre"] += credito_disciplina
-    # --- FIM DA MUDANÇA ---
+    # --- FIM DA CORREÇÃO ---
 
     # Calcula os novos mínimos de optativas (agora com a contagem correta)
     creditos_minimos_restantes = {
@@ -67,11 +65,10 @@ def resolver_grade(dados, todas_disciplinas_info, creditos_minimos,
     
     NUM_SEMESTRES_TOTAL = 14 
 
-    # --- 3. Variáveis de Decisão (USA OS INPUTS DO USUÁRIO) ---
+    # --- 3. Variáveis de Decisão ---
     alocacao = {}
-    for d_id in disciplinas_a_cursar_ids: # <-- Usa a lista filtrada
+    for d_id in disciplinas_a_cursar_ids: 
         for t_id in turmas_por_disciplina.get(d_id, []):
-            # <-- Começa do semestre certo
             for s in range(semestre_inicio, NUM_SEMESTRES_TOTAL + 1): 
                 # (Regra par/ímpar relaxada)
                 alocacao[(d_id, s, t_id)] = solver.BoolVar(f'alocacao_{d_id}_s{s}_t{t_id}')
@@ -83,7 +80,7 @@ def resolver_grade(dados, todas_disciplinas_info, creditos_minimos,
     
     # --- 4. Restrições ---
 
-    # R1.1: Obrigatórias (Usa a lista filtrada)
+    # R1.1: Obrigatórias
     for d_id in obrigatorias_a_cursar:
         vars_obrigatoria = [var for key, var in alocacao.items() if key[0] == d_id]
         if not vars_obrigatoria:
@@ -91,13 +88,13 @@ def resolver_grade(dados, todas_disciplinas_info, creditos_minimos,
              continue
         solver.Add(solver.Sum(vars_obrigatoria) == 1)
 
-    # R1.2: Optativas (Usa a lista filtrada)
+    # R1.2: Optativas
     for d_id in optativas_a_cursar:
         vars_optativa = [var for key, var in alocacao.items() if key[0] == d_id]
         if vars_optativa:
             solver.Add(solver.Sum(vars_optativa) <= 1)
 
-    # R2: Ligação (Usa a lista filtrada)
+    # R2: Ligação
     cursada_vars = {}
     DUMMY_VALUE = NUM_SEMESTRES_TOTAL + 2
     for d_id in disciplinas_a_cursar_ids:
@@ -112,9 +109,7 @@ def resolver_grade(dados, todas_disciplinas_info, creditos_minimos,
         cursada_vars[d_id] = cursada_var 
         termos_semestre = []
         for (d, s, t), var in alocacao.items():
-            if d == d_id:
-                termos_semestre.append(s * var)
-        
+            if d == d_id: termos_semestre.append(s * var)
         solver.Add(semestre_da_disciplina[d_id] == solver.Sum(termos_semestre) + (1 - cursada_var) * DUMMY_VALUE) 
 
     # R3: Créditos Mínimos (Usa os valores restantes)
@@ -128,25 +123,20 @@ def resolver_grade(dados, todas_disciplinas_info, creditos_minimos,
         solver.Add(solver.Sum(int(disciplinas[d_id]['creditos']) * cursada_vars[d_id] 
                              for d_id in ids_livres_total if d_id in cursada_vars) >= creditos_minimos_restantes['livre'])
 
-    # --- R4: Pré-requisitos (USA OS INPUTS DO USUÁRIO) ---
+    # R4: Pré-requisitos
     M_prereq = NUM_SEMESTRES_TOTAL + 2 
     for d_id in disciplinas_a_cursar_ids:
-        disc_info = disciplinas[d_id] # 'disciplinas' (filtrado) é correto aqui
+        disc_info = disciplinas[d_id] 
         for prereq_id in disc_info.get('prerequisitos', []):
-            
-            # <-- Checa as disciplinas concluídas
             if prereq_id in disciplinas_concluidas_ids: 
                 continue 
-
-            # <-- Checa a lista filtrada
             elif prereq_id in disciplinas_a_cursar_ids: 
                 solver.Add(cursada_vars[prereq_id] >= cursada_vars[d_id])
                 solver.Add(semestre_da_disciplina[d_id] - semestre_da_disciplina[prereq_id] >= 
                            1 - M_prereq * (1 - cursada_vars[d_id]))
-            
             # (Bloco 'else' removido para replicar o CP-SAT)
 
-    # --- Variáveis Auxiliares para Créditos ---
+    # Variáveis Auxiliares (Ainda necessárias para R6)
     creditos_cursados_no_semestre = {}
     for s in range(semestre_inicio, NUM_SEMESTRES_TOTAL + 1):
         termos_de_credito_s = []
@@ -177,7 +167,6 @@ def resolver_grade(dados, todas_disciplinas_info, creditos_minimos,
         solver.Add(creditos_cursados_no_semestre[s] <= CREDITOS_MAXIMOS_POR_SEMESTRE)
 
     # --- R7: Regra de Estágio (REMOVIDA PARA TESTE) ---
-    # (Bloco vazio)
     
     # --- 5. Função Objetivo (SIMPLES, como o CP-SAT) ---
     semestre_maximo = solver.IntVar(semestre_inicio, NUM_SEMESTRES_TOTAL, 'semestre_maximo')
@@ -209,6 +198,12 @@ def resolver_grade(dados, todas_disciplinas_info, creditos_minimos,
         
         grade_filtrada = {s: g for s, g in grade.items() if g}
         
-        return grade, creditos_por_semestre, status, solver.Objective().Value()
+        # solver.ObjectiveValue() para MILP retorna o valor da função objetivo
+        obj_val = solver.Objective().Value()
+        
+        # Se você quiser o semestre máximo real (não o valor da F.O.)
+        # Podemos pegar o 'obj_val' pois o objetivo é simples
+        
+        return grade_filtrada, creditos_por_semestre, status, obj_val
     
     return None, None, status, None

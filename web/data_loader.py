@@ -63,7 +63,7 @@ def carregar_dados(caminho_disciplinas, caminho_ofertas, disciplinas_concluidas=
             horarios_por_turma[t_id] = oferta.get('horario', [])
 
             if 'periodo' in oferta and oferta['periodo']:
-                periodos = {int(p.strip()) for p in oferta['periodo'].split(',')}
+                periodos = {int(p.strip()) for p in oferta['periodo'].split(',') if p.strip()}
                 if d_id not in periodos_validos_por_disciplina:
                     periodos_validos_por_disciplina[d_id] = set()
                 periodos_validos_por_disciplina[d_id].update(periodos)
