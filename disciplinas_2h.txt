@@ -1,0 +1,162 @@
+[
+    {
+        "disciplina_id": "ARTIFICIAL_2H",
+        "turma_id": "ARTIFICIAL_2HT1",
+        "horario": [
+            "SEG-08-10"
+        ],
+        "periodo": "1, 2"
+    },
+    {
+        "disciplina_id": "ARTIFICIAL_2H",
+        "turma_id": "ARTIFICIAL_2HT2",
+        "horario": [
+            "SEG-10-12"
+        ],
+        "periodo": "1, 2"
+    },
+    {
+        "disciplina_id": "ARTIFICIAL_2H",
+        "turma_id": "ARTIFICIAL_2HT3",
+        "horario": [
+            "SEG-13-15"
+        ],
+        "periodo": "1, 2"
+    },
+    {
+        "disciplina_id": "ARTIFICIAL_2H",
+        "turma_id": "ARTIFICIAL_2HT4",
+        "horario": [
+            "SEG-15-17"
+        ],
+        "periodo": "1, 2"
+    },
+    {
+        "disciplina_id": "ARTIFICIAL_2H",
+        "turma_id": "ARTIFICIAL_2HT5",
+        "horario": [
+            "TER-08-10"
+        ],
+        "periodo": "1, 2"
+    },
+    {
+        "disciplina_id": "ARTIFICIAL_2H",
+        "turma_id": "ARTIFICIAL_2HT6",
+        "horario": [
+            "TER-10-12"
+        ],
+        "periodo": "1, 2"
+    },
+    {
+        "disciplina_id": "ARTIFICIAL_2H",
+        "turma_id": "ARTIFICIAL_2HT7",
+        "horario": [
+            "TER-13-15"
+        ],
+        "periodo": "1, 2"
+    },
+    {
+        "disciplina_id": "ARTIFICIAL_2H",
+        "turma_id": "ARTIFICIAL_2HT8",
+        "horario": [
+            "TER-15-17"
+        ],
+        "periodo": "1, 2"
+    },
+    {
+        "disciplina_id": "ARTIFICIAL_2H",
+        "turma_id": "ARTIFICIAL_2HT9",
+        "horario": [
+            "QUA-08-10"
+        ],
+        "periodo": "1, 2"
+    },
+    {
+        "disciplina_id": "ARTIFICIAL_2H",
+        "turma_id": "ARTIFICIAL_2HT10",
+        "horario": [
+            "QUA-10-12"
+        ],
+        "periodo": "1, 2"
+    },
+    {
+        "disciplina_id": "ARTIFICIAL_2H",
+        "turma_id": "ARTIFICIAL_2HT11",
+        "horario": [
+            "QUA-13-15"
+        ],
+        "periodo": "1, 2"
+    },
+    {
+        "disciplina_id": "ARTIFICIAL_2H",
+        "turma_id": "ARTIFICIAL_2HT12",
+        "horario": [
+            "QUA-15-17"
+        ],
+        "periodo": "1, 2"
+    },
+    {
+        "disciplina_id": "ARTIFICIAL_2H",
+        "turma_id": "ARTIFICIAL_2HT13",
+        "horario": [
+            "QUI-08-10"
+        ],
+        "periodo": "1, 2"
+    },
+    {
+        "disciplina_id": "ARTIFICIAL_2H",
+        "turma_id": "ARTIFICIAL_2HT14",
+        "horario": [
+            "QUI-10-12"
+        ],
+        "periodo": "1, 2"
+    },
+    {
+        "disciplina_id": "ARTIFICIAL_2H",
+        "turma_id": "ARTIFICIAL_2HT15",
+        "horario": [
+            "QUI-13-15"
+        ],
+        "periodo": "1, 2"
+    },
+    {
+        "disciplina_id": "ARTIFICIAL_2H",
+        "turma_id": "ARTIFICIAL_2HT16",
+        "horario": [
+            "QUI-15-17"
+        ],
+        "periodo": "1, 2"
+    },
+    {
+        "disciplina_id": "ARTIFICIAL_2H",
+        "turma_id": "ARTIFICIAL_2HT17",
+        "horario": [
+            "SEX-08-10"
+        ],
+        "periodo": "1, 2"
+    },
+    {
+        "disciplina_id": "ARTIFICIAL_2H",
+        "turma_id": "ARTIFICIAL_2HT18",
+        "horario": [
+            "SEX-10-12"
+        ],
+        "periodo": "1, 2"
+    },
+    {
+        "disciplina_id": "ARTIFICIAL_2H",
+        "turma_id": "ARTIFICIAL_2HT19",
+        "horario": [
+            "SEX-13-15"
+        ],
+        "periodo": "1, 2"
+    },
+    {
+        "disciplina_id": "ARTIFICIAL_2H",
+        "turma_id": "ARTIFICIAL_2HT20",
+        "horario": [
+            "SEX-15-17"
+        ],
+        "periodo": "1, 2"
+    }
+]
