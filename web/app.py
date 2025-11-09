@@ -17,13 +17,27 @@ CREDITOS_MINIMOS_TOTAIS = {
     "livre": 8
 }
 
-# --- NOVO: Defina o total de créditos do seu curso ---
 # Ajuste este valor para a realidade do seu currículo (ex: 240)
 TOTAL_CREDITOS_CURSO = 240 
 
-# --- Cache ---
+# --- MUDANÇA: Carregar o JSON completo aqui ---
+try:
+    with open(CAMINHO_DISCIPLINAS, 'r', encoding='utf-8') as f:
+        TODAS_DISCIPLINAS_INFO = {d['id']: d for d in json.load(f)}
+except Exception as e:
+    st.error(f"ERRO CRÍTICO: Não foi possível ler {CAMINHO_DISCIPLINAS}. {e}")
+    st.stop()
+# --- FIM DA MUDANÇA ---
+
+
 @st.cache_data
 def carregar_dados_cached():
+    """
+    Carrega os dados dos arquivos JSON.
+    NOTA: Este loader ainda filtra disciplinas sem oferta,
+    o que é CORRETO para o solver (que só pode alocar o que é ofertado).
+    A contagem de créditos será feita separadamente.
+    """
     try:
         return carregar_dados(CAMINHO_DISCIPLINAS, CAMINHO_OFERTAS)
     except FileNotFoundError as e:
@@ -54,11 +68,10 @@ def criar_grade_semanal(disciplinas_do_semestre):
                     slot = f"{partes[1]}-{partes[2]}"
                     slots_presentes.add(slot)
             except Exception:
-                pass # Ignora erros de parsing aqui
+                pass 
     
-    # Usa a lista ordenada de slots
     slots_index = sorted(list(slots_presentes))
-    if not slots_index: # Caso não haja horários
+    if not slots_index: 
         slots_index = slots_horas
         
     df = pd.DataFrame(index=slots_index, columns=dias_semana).fillna("")
@@ -101,24 +114,15 @@ if not dados:
 # --- Entradas do Usuário (com botões Selecionar/Limpar) ---
 st.header("1. Suas Informações")
 
-# Carrega TODAS as disciplinas para a seleção
-try:
-    with open(CAMINHO_DISCIPLINAS, 'r', encoding='utf-8') as f:
-        todas_disciplinas_data = json.load(f)
-except Exception as e:
-    st.error(f"Não foi possível ler o arquivo de disciplinas para a seleção: {e}")
-    st.stop()
-
-# Organiza as disciplinas por tipo/período
+# (O JSON completo já foi carregado em TODAS_DISCIPLINAS_INFO)
 obrigatorias_por_periodo = {}
 opt_restritas = []
 opt_condicionadas = []
 opt_livres = []
 outras = []
 
-for d in todas_disciplinas_data:
+for d_id, d in TODAS_DISCIPLINAS_INFO.items():
     tipo = d.get("tipo", "")
-    # O item da opção agora é o par (label, id)
     opcao = (f"{d['id']} - {d.get('nome', 'Nome Desconhecido')}", d['id'])
     
     if "Período" in tipo:
@@ -132,73 +136,50 @@ for d in todas_disciplinas_data:
     elif "Livre Escolha" in tipo or d["id"].startswith("ARTIFICIAL"):
         opt_livres.append(opcao)
     else:
-        outras.append(opcao) # Para disciplinas sem tipo (Estágio, TCC, etc.)
+        outras.append(opcao) 
 
-# --- Agrupa todas as seções ---
 st.subheader("Disciplinas Concluídas")
 st.write("Marque todas as disciplinas que você já cursou e foi aprovado.")
 
-# Agrupa todas as listas de opções em um dicionário para facilitar
 grupos_de_selecao = {}
-# Adiciona as obrigatórias ordenadas
 for periodo in sorted(obrigatorias_por_periodo.keys()):
     grupos_de_selecao[f"Obrigatórias - {periodo}"] = obrigatorias_por_periodo[periodo]
-# Adiciona as optativas e outras
 grupos_de_selecao["Optativas - Escolha Restrita"] = opt_restritas
 grupos_de_selecao["Optativas - Escolha Condicionada"] = opt_condicionadas
 grupos_de_selecao["Optativas - Livre Escolha"] = opt_livres
 if outras:
     grupos_de_selecao["Outras (Estágio, TCC, etc.)"] = outras
 
-# --- Loop dinâmico com st.session_state ---
 for titulo_grupo, opcoes_grupo in grupos_de_selecao.items():
-    
-    # Cria uma chave única para o session_state
     chave_estado = f"select_{titulo_grupo}"
-    
-    # Inicializa o estado de seleção para este grupo, se ainda não existir
     if chave_estado not in st.session_state:
         st.session_state[chave_estado] = []
-
     with st.expander(titulo_grupo):
-        
-        # Cria colunas para os botões
         col1, col2, col_vazia = st.columns([1, 1, 3])
-        
-        # Botão "Selecionar Tudo"
         with col1:
             if st.button(f"Selecionar Tudo", key=f"btn_all_{chave_estado}"):
-                # Define o estado como a lista completa de opções
                 st.session_state[chave_estado] = opcoes_grupo
-                st.rerun() # Corrigido de experimental_rerun
-        
-        # Botão "Limpar"
+                st.rerun() 
         with col2:
             if st.button(f"Limpar", key=f"btn_clear_{chave_estado}"):
-                # Define o estado como uma lista vazia
                 st.session_state[chave_estado] = []
-                st.rerun() # Corrigido de experimental_rerun
-
-        # O multiselect agora usa 'key' para ler e escrever no st.session_state
+                st.rerun() 
         st.multiselect(
             f"Selecione as disciplinas ({titulo_grupo}):",
             options=opcoes_grupo,
-            format_func=lambda x: x[0], # Mostra o label "ID - Nome"
-            key=chave_estado, # Vincula o widget ao session_state
-            label_visibility="collapsed" # Esconde o label, já que o expander tem o título
+            format_func=lambda x: x[0],
+            key=chave_estado,
+            label_visibility="collapsed"
         )
 
-# --- Coleta dos IDs ---
 all_selected_ids = set()
 for key, selected_items in st.session_state.items():
-    if key.startswith("select_"): # Filtra apenas as chaves de seleção
+    if key.startswith("select_"):
         for item in selected_items:
-            all_selected_ids.add(item[1]) # Adiciona o ID (item[1]) ao set
+            all_selected_ids.add(item[1]) 
 
 disciplinas_concluidas_ids = list(all_selected_ids)
 
-
-# --- Seção do Semestre Inicial ---
 st.subheader("Próximo Semestre")
 semestre_inicio = st.number_input(
     "Qual o NÚMERO do seu próximo semestre? (Ex: 1, 2, 3...)",
@@ -208,7 +189,6 @@ semestre_inicio = st.number_input(
 )
 st.warning(f"Otimizador irá considerar que você está começando o **{semestre_inicio}º semestre**.")
 
-
 # --- Botão para Executar ---
 st.header("2. Gerar Grade")
 
@@ -217,13 +197,15 @@ if st.button("Encontrar Grade Otimizada", type="primary"):
     
     with st.spinner("Calculando a melhor rota... O solver MILP está trabalhando. Isso pode levar alguns minutos..."):
         
+        # --- MUDANÇA: Passar TODAS_DISCIPLINAS_INFO como novo argumento ---
         grade, creditos, status, obj_value = resolver_grade(
             dados, 
+            TODAS_DISCIPLINAS_INFO, # <-- NOVO ARGUMENTO
             CREDITOS_MINIMOS_TOTAIS, 
             CREDITOS_MAXIMOS_POR_SEMESTRE,
             disciplinas_concluidas_ids,
             semestre_inicio,
-            TOTAL_CREDITOS_CURSO  # <<< Novo parâmetro
+            TOTAL_CREDITOS_CURSO
         )
 
     end_time = time.time()
@@ -233,9 +215,7 @@ if st.button("Encontrar Grade Otimizada", type="primary"):
     st.header("3. Resultados")
 
     if status == pywraplp.Solver.OPTIMAL or status == pywraplp.Solver.FEASIBLE:
-        
         semestres_restantes = (int(obj_value) - semestre_inicio) + 1
-        
         st.success("🎉 Solução encontrada!")
         
         col1, col2 = st.columns(2)
